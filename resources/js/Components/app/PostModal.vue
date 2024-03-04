@@ -40,6 +40,8 @@ const props = defineProps({
     modelValue: Boolean,
 });
 
+const attachmentExtentions = usePage().props.attachmentExtentions;
+
 const form = useForm({
     body: "",
     attachments: [],
@@ -74,7 +76,11 @@ function closeModal() {
 function resetModal() {
     form.reset();
     attachmentFiles.value = [];
-    props.post.attachments.forEach((file) => (file.deleted = false));
+    showExtentionText.value = false;
+    attachmentErrors.value = [];
+    if (props.post.attachments) {
+        props.post.attachments.forEach((file) => (file.deleted = false));
+    }
 }
 
 function submit() {
@@ -86,6 +92,9 @@ function submit() {
             onSuccess: () => {
                 closeModal();
             },
+            onError: (errors) => {
+                proccessErrors(errors);
+            },
         });
     } else {
         form.post(route("posts.create"), {
@@ -93,14 +102,35 @@ function submit() {
             onSuccess: () => {
                 closeModal();
             },
+            onError: (errors) => {
+                proccessErrors(errors);
+            },
         });
     }
 }
 
+function proccessErrors(errors) {
+    for (const key in errors) {
+        if (key.includes(".")) {
+            const [, index] = key.split(".");
+            attachmentErrors.value[index] = errors[key];
+        }
+    }
+}
+
 const attachmentFiles = ref([]);
+const attachmentErrors = ref([]);
+const showExtentionText = ref(false);
 
 async function onAttachmentChoose($event) {
+    showExtentionText.value = false;
+
     for (const file of $event.target.files) {
+        let parts = file.name.split(".");
+        let ext = parts.pop().toLowerCase();
+        if (!attachmentExtentions.includes(ext)) {
+            showExtentionText.value = true;
+        }
         const myFile = {
             file,
             url: await readFile(file),
@@ -205,6 +235,19 @@ function undoDeleted(myFile) {
                                     ></ckeditor>
 
                                     <div
+                                        v-if="showExtentionText"
+                                        class="border-l-4 border-lime-300 py-2 px-3 bg-lime-100 mt-3 text-gray-800"
+                                    >
+                                        File must be one following extention:
+                                        <br />
+                                        <small>
+                                            {{
+                                                attachmentExtentions.join(", ")
+                                            }}
+                                        </small>
+                                    </div>
+
+                                    <div
                                         class="grid gap-3 my-3"
                                         :class="[
                                             computedAttachments.length === 1
@@ -212,13 +255,18 @@ function undoDeleted(myFile) {
                                                 : 'grid-cols-2',
                                         ]"
                                     >
-                                        <template
+                                        <div
                                             v-for="(
                                                 myFile, ind
                                             ) in computedAttachments"
                                         >
                                             <div
-                                                class="group aspect-square bg-blue-100 flex flex-col items-center justify-center text-gray-500 relative"
+                                                class="group aspect-square bg-blue-100 flex flex-col items-center justify-center text-gray-500 relative border-2"
+                                                :class="
+                                                    attachmentErrors[ind]
+                                                        ? 'border-red-500'
+                                                        : ''
+                                                "
                                             >
                                                 <div
                                                     v-if="myFile.deleted"
@@ -278,7 +326,13 @@ function undoDeleted(myFile) {
                                                     </small>
                                                 </div>
                                             </div>
-                                        </template>
+                                            <small
+                                                class="text-red-400 text-center"
+                                                >{{
+                                                    attachmentErrors[ind]
+                                                }}</small
+                                            >
+                                        </div>
                                     </div>
                                 </div>
 

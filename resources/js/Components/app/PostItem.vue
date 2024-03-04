@@ -144,6 +144,7 @@ function openAttachment(ind) {
 
                     <!-- Download -->
                     <a
+                        @click.stop
                         :href="route('post.download', attachment)"
                         class="z-20 opacity-0 group-hover:opacity-100 transition-all w-8 h-8 bg-gray-700 rounded flex items-center justify-center text-gray-100 absolute top-2 right-2 cursor-pointer hover:bg-gray-800"
                     >
