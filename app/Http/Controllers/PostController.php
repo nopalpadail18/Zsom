@@ -118,4 +118,13 @@ class PostController extends Controller
 
         return back();
     }
+
+    public function downloadAttachment(PostAttachments $attachment)
+    {
+        return response()
+            ->download(
+                storage_path('app/public/' . $attachment->path),
+                $attachment->name
+            );
+    }
 }

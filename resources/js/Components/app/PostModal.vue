@@ -221,17 +221,6 @@ function undoDeleted(myFile) {
                                                 class="group aspect-square bg-blue-100 flex flex-col items-center justify-center text-gray-500 relative"
                                             >
                                                 <div
-                                                    v-if="ind === 3"
-                                                    class="absolute top-0 left-0 bottom-0 right-0 z-10 bg-black/60 flex items-center justify-center text-white text-2xl"
-                                                >
-                                                    +{{
-                                                        attachmentFiles.length -
-                                                        4
-                                                    }}
-                                                    more
-                                                </div>
-
-                                                <div
                                                     v-if="myFile.deleted"
                                                     class="absolute left-0 bottom-0 right-0 py-2 px-3 text-sm bg-black text-white flex items-center justify-between z-10"
                                                 >
