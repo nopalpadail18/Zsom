@@ -32,4 +32,9 @@ class Posts extends Model
     {
         return $this->hasMany(PostAttachments::class, 'post_id', 'id')->latest();
     }
+
+    public function reactions(): HasMany
+    {
+        return $this->hasMany(Reactions::class, 'post_id', 'id');
+    }
 }
