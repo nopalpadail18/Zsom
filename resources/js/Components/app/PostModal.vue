@@ -73,14 +73,27 @@ function closeModal() {
     resetModal();
 }
 
+const showExtentionText = computed(() => {
+    for (let myFile of attachmentFiles.value) {
+        let file = myFile.file;
+        let parts = file.name.split(".");
+        let ext = parts.pop().toLowerCase();
+        if (!attachmentExtentions.includes(ext)) {
+            return true;
+        }
+    }
+});
+
 function resetModal() {
     form.reset();
     attachmentFiles.value = [];
-    showExtentionText.value = false;
+    formErrors.value = {};
     attachmentErrors.value = [];
     if (props.post.attachments) {
         props.post.attachments.forEach((file) => (file.deleted = false));
     }
+
+    return false;
 }
 
 function submit() {
@@ -109,7 +122,12 @@ function submit() {
     }
 }
 
+const attachmentFiles = ref([]);
+const attachmentErrors = ref([]);
+const formErrors = ref({});
+
 function proccessErrors(errors) {
+    formErrors.value = errors;
     for (const key in errors) {
         if (key.includes(".")) {
             const [, index] = key.split(".");
@@ -118,19 +136,10 @@ function proccessErrors(errors) {
     }
 }
 
-const attachmentFiles = ref([]);
-const attachmentErrors = ref([]);
-const showExtentionText = ref(false);
-
 async function onAttachmentChoose($event) {
     showExtentionText.value = false;
 
     for (const file of $event.target.files) {
-        let parts = file.name.split(".");
-        let ext = parts.pop().toLowerCase();
-        if (!attachmentExtentions.includes(ext)) {
-            showExtentionText.value = true;
-        }
         const myFile = {
             file,
             url: await readFile(file),
@@ -245,6 +254,13 @@ function undoDeleted(myFile) {
                                                 attachmentExtentions.join(", ")
                                             }}
                                         </small>
+                                    </div>
+
+                                    <div
+                                        v-if="formErrors.attachments"
+                                        class="border-l-4 border-red-300 py-2 px-3 bg-red-100 mt-3 text-gray-800"
+                                    >
+                                        {{ formErrors.attachments }}
                                     </div>
 
                                     <div
