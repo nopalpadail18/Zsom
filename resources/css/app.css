@@ -60,6 +60,10 @@
 .ck-content-output > pre {
     margin: revert;
 }
+.ck-content-output > *:last-child {
+    margin-bottom: 0;
+}
+
 .ck-content-output > ol,
 .ck-content-output > ul {
     border-collapse: revert;
