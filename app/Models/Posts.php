@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Posts extends Model
 {
@@ -33,9 +34,9 @@ class Posts extends Model
         return $this->hasMany(PostAttachments::class, 'post_id', 'id')->latest();
     }
 
-    public function reactions(): HasMany
+    public function reactions(): MorphMany
     {
-        return $this->hasMany(Reactions::class, 'post_id', 'id');
+        return $this->morphMany(Reactions::class, 'object');
     }
 
     public function comments(): HasMany

@@ -1,6 +1,7 @@
 <script setup>
 import {
     ChatBubbleLeftRightIcon,
+    ChatBubbleLeftEllipsisIcon,
     HandThumbUpIcon,
     ArrowDownTrayIcon,
 } from "@heroicons/vue/24/outline";
@@ -72,14 +73,12 @@ function deleteComment(comment) {
     if (!window.confirm("Are you sure you want to delete this comment?")) {
         return false;
     }
-    axiosClient
-        .delete(route("post.comment.delete", comment.id))
-        .then(({ data }) => {
-            props.post.comments = props.post.comments.filter(
-                (c) => c.id !== comment.id
-            );
-            props.post.num_of_comments--;
-        });
+    axiosClient.delete(route("comment.delete", comment.id)).then(({ data }) => {
+        props.post.comments = props.post.comments.filter(
+            (c) => c.id !== comment.id
+        );
+        props.post.num_of_comments--;
+    });
 }
 
 function startEditingComment(comment) {
@@ -91,7 +90,7 @@ function startEditingComment(comment) {
 
 function updateComment() {
     axiosClient
-        .put(route("post.comment.update", editingComment.value.id), {
+        .put(route("comment.update", editingComment.value.id), {
             comment: editingComment.value.comment,
         })
         .then(({ data }) => {
@@ -102,6 +101,17 @@ function updateComment() {
                 }
                 return c;
             });
+        });
+}
+
+function sendCommentReaction(comment) {
+    axiosClient
+        .post(route("comment.reaction", comment.id), {
+            reaction: "like",
+        })
+        .then(({ data }) => {
+            comment.curent_user_has_reactions = data.curent_user_has_reactions;
+            comment.num_of_reactions = data.num_of_reactions;
         });
 }
 </script>
@@ -247,38 +257,68 @@ function updateComment() {
                                     @delete="deleteComment(comment)"
                                 />
                             </div>
-                            <div
-                                class="ml-12"
-                                v-if="
-                                    editingComment &&
-                                    editingComment.id === comment.id
-                                "
-                            >
-                                <InputTextarea
-                                    v-model="editingComment.comment"
-                                    placeholder="Write a comment"
-                                    rows="1"
-                                    class="w-full max-h-[160px] resize-none"
+                            <div class="pl-12">
+                                <div
+                                    v-if="
+                                        editingComment &&
+                                        editingComment.id === comment.id
+                                    "
+                                >
+                                    <InputTextarea
+                                        v-model="editingComment.comment"
+                                        placeholder="Write a comment"
+                                        rows="1"
+                                        class="w-full max-h-[160px] resize-none"
+                                    />
+                                    <div class="flex gap-2 justify-end">
+                                        <DangerButton
+                                            @click="editingComment = null"
+                                        >
+                                            Cancle
+                                        </DangerButton>
+                                        <IndigoButton
+                                            class="w-[100px] max-w-[100]"
+                                            @click="updateComment"
+                                        >
+                                            Update
+                                        </IndigoButton>
+                                    </div>
+                                </div>
+                                <ReadMoreReadLess
+                                    v-else
+                                    :content="comment.comment"
+                                    content-class="text-sm flex flex-1"
                                 />
-                                <div class="flex gap-2 justify-end">
-                                    <DangerButton
-                                        @click="editingComment = null"
+                                <div class="flex gap-2 mt-1">
+                                    <button
+                                        @click="sendCommentReaction(comment)"
+                                        class="flex items-center text-sm text-indigo-500 py-0.5 px-1 rounded-lg"
+                                        :class="[
+                                            comment.curent_user_has_reactions
+                                                ? 'bg-indigo-50 hover:bg-indigo-100'
+                                                : ' hover:bg-indigo-50',
+                                        ]"
                                     >
-                                        Cancle
-                                    </DangerButton>
-                                    <IndigoButton
-                                        class="w-[100px] max-w-[100]"
-                                        @click="updateComment"
+                                        <HandThumbUpIcon class="w-3 h-3 mr-1" />
+                                        <span class="mr-2">
+                                            {{ comment.num_of_reactions }}
+                                        </span>
+                                        {{
+                                            comment.curent_user_has_reactions
+                                                ? "liked"
+                                                : "like"
+                                        }}
+                                    </button>
+                                    <button
+                                        class="flex items-center text-sm text-indigo-500 py-0.5 px-1 hover:bg-indigo-100 rounded-lg"
                                     >
-                                        Update
-                                    </IndigoButton>
+                                        <ChatBubbleLeftEllipsisIcon
+                                            class="w-3 h-3 mr-1"
+                                        />
+                                        reply
+                                    </button>
                                 </div>
                             </div>
-                            <ReadMoreReadLess
-                                v-else
-                                :content="comment.comment"
-                                content-class="text-sm flex flex-1 ml-12"
-                            />
                         </div>
                     </div>
                 </div>
