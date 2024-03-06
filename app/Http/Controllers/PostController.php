@@ -171,12 +171,14 @@ class PostController extends Controller
     {
         $data = $request->validate([
             'comment' => 'required',
+            'parent_id' => 'nullable|exists:comments,id'
         ]);
 
         $comment = Comments::create([
             'post_id' => $post->id,
             'comment' => nl2br($data['comment']),
             'user_id' => Auth::id(),
+            'parent_id' => $data['parent_id'] ?: null,
         ]);
 
         return response(new CommentResource($comment), 201);

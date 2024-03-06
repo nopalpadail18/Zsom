@@ -38,7 +38,7 @@ class StorePostRequest extends FormRequest
                 function ($attribute, $value, $fail) {
                     $totalSize = collect($value)->sum(fn (UploadedFile $file) => $file->getSize());
 
-                    if ($totalSize > 5120) { //5MB
+                    if ($totalSize > 5 * 1024 * 1024) { //5MB
                         $fail('File too large');
                     }
                 }
