@@ -23,27 +23,15 @@ class HomeController extends Controller
                     $q->where('user_id', $userId);
                 }
             ])
-            // ->withCount('reactions')
-            // ->withCount('comments')
-            // ->with([
-            //     'comments' => function ($q) use ($userId) {
-            //         $q
-            //             ->whereNull('parent_id')
-            //             ->withCount('reactions')
-            //             ->withCount('comments')
-            //             ->with([
-            //                 'reactions' => function ($q) use ($userId) {
-            //                     $q->where('user_id', $userId);
-            //                 }
-            //             ]);
-            //     },
-            //     'reactions' => function ($q) use ($userId) {
-            //         $q->where('user_id', $userId);
-            //     }
-            // ])
-            ->latest()->paginate(20);
+            ->latest()->paginate(10);
+
+        $posts = PostResource::collection($posts);
+        if($request->wantsJson()){
+            return $posts;
+        }
+
         return Inertia::render('Home', [
-            'posts' => PostResource::collection($posts)
+            'posts' => $posts
         ]);
     }
 }
