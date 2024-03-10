@@ -28,19 +28,21 @@ class GroupController extends Controller
     {
         $data = $request->validated();
         $data['user_id'] = Auth::id();
-        $groups = Groups::create($data);
+        $group = Groups::create($data);
 
         $groupUserData = [
             'status' => GroupUserStatus::APPROVED->value,
             'role'   => GroupUserRole::ADMIN->value,
             'user_id' => Auth::id(),
-            'group_id' => $groups->id,
+            'group_id' => $group->id,
             'created_by' => Auth::id(),
         ];
 
-        $groupUser = GroupUsers::create($groupUserData);
+        GroupUsers::create($groupUserData);
+        $group->status = $groupUserData['status'];
+        $group->role = $groupUserData['role'];
 
-        return response(new GroupResource($groups), 200);
+        return response(new GroupResource($group), 200);
     }
 
     /**

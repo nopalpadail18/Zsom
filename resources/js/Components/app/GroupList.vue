@@ -1,10 +1,10 @@
 <script setup>
 import GroupListItems from "@/Components/app/GroupListItems.vue";
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
-import GroupModal from "./GroupModal.vue";
-import { ref } from "vue";
 
-const showNewGroupModal = ref(false);
+defineProps({
+    groups: Array,
+})
 </script>
 <template>
     <div
@@ -31,21 +31,15 @@ const showNewGroupModal = ref(false);
                     </div>
                 </DisclosureButton>
                 <DisclosurePanel>
-                    <button @click="showNewGroupModal = true"
-                    class="text-white text-sm bg-indigo-600 hover:bg-indigo-500 px-2 py-1 rounded">Add Group</button>
-
-                    <GroupListItems />
+                    <GroupListItems :groups="groups"/>
                 </DisclosurePanel>
             </Disclosure>
         </div>
         <div class="h-full overflow-hidden flex-col hidden lg:flex">
             <div class="flex justify-between">
                 <h2 class="text-xl font-bold">My Group</h2>
-                <button @click="showNewGroupModal = true"
-                    class="text-white text-sm bg-indigo-600 hover:bg-indigo-500 px-2 py-1 rounded">Add Group</button>
             </div>
-            <GroupListItems />
+            <GroupListItems :groups="groups"/>
         </div>
     </div>
-    <GroupModal :model-value="showNewGroupModal" @hide="showNewGroupModal = false"/>
 </template>
