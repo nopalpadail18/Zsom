@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\GroupController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
@@ -46,6 +47,10 @@ Route::middleware('auth')->group(function () {
         ->name('comment.update');
     Route::post('/comment/{comment}/reaction', [PostController::class, 'commentReaction'])
         ->name('comment.reaction');
+    //Groups
+    Route::post('/group', [GroupController::class, 'store'])
+        ->name('group.create');
+
 });
 
 require __DIR__ . '/auth.php';
