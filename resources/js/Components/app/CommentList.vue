@@ -117,7 +117,7 @@ function onCommentDelete(comment) {
             <img
                 :src="authUser.avatar_url"
                 alt=""
-                class="w-[40px] rounded-full border-2 transition-all hover:border-blue-400"
+                class="w-[40px] h-[40px] object-cover rounded-full border-2 transition-all hover:border-blue-400"
             />
         </a>
         <div class="relative flex flex-1">
@@ -148,7 +148,7 @@ function onCommentDelete(comment) {
                             <img
                                 :src="comment.user.avatar_url"
                                 alt=""
-                                class="w-[40px] rounded-full border-2 transition-all hover:border-blue-400"
+                                class="w-[40px] h-[40px] object-cover rounded-full border-2 transition-all hover:border-blue-400"
                             />
                         </a>
                         <div>

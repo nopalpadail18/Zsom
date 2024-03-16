@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Validation\Rules\File;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Auth;
 
 class StorePostRequest extends FormRequest
 {
@@ -54,7 +55,7 @@ class StorePostRequest extends FormRequest
     public function prepareForValidation()
     {
         $this->merge([
-            'user_id' => auth()->user()->id,
+            'user_id' => Auth::id(),
             'body' => $this->input('body') ?: ''
         ]);
     }

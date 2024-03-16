@@ -3,35 +3,30 @@ import { ref } from "vue";
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from "@headlessui/vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import TabItem from "@/Pages/Profile/Partials/TabItem.vue";
-import Edit from "./Edit.vue";
 import { usePage } from "@inertiajs/vue3";
 import { computed } from "vue";
 import { XMarkIcon, CheckCircleIcon, CameraIcon } from "@heroicons/vue/24/outline";
-import { Head, useForm } from "@inertiajs/vue3";
+import { Head,useForm } from "@inertiajs/vue3";
+import PrimaryButtonVue from "@/Components/PrimaryButton.vue";
 
 const imagesForm = useForm({
+  thumbnail: null,
   cover: null,
-  avatar: null,
 });
 
 const showNotification = ref(true);
 const coverImageSrc = ref("");
-const avatarImageSrc = ref("");
+const thumbnailImageSrc = ref("");
 const authUser = usePage().props.auth.user;
-const isMyProfile = computed(() => authUser && authUser.id === props.user.id);
+const isCurrentUserAdmin = computed(() => props.group.role === "admin");
+
 
 const props = defineProps({
   errors: Object,
-  mustVerifyEmail: {
-    type: Boolean,
-  },
-  status: {
-    type: String,
-  },
   success: {
     type: String,
   },
-  user: {
+  group: {
     type: Object,
   },
 });
@@ -46,14 +41,14 @@ function onCoverChange(e) {
     reader.readAsDataURL(imagesForm.cover);
   }
 }
-function onAvatarChange(e) {
-  imagesForm.avatar = e.target.files[0];
-  if (imagesForm.avatar) {
+function onThumbnailChange(e) {
+  imagesForm.thumbnail = e.target.files[0];
+  if (imagesForm.thumbnail) {
     const reader = new FileReader();
     reader.onload = () => {
-      avatarImageSrc.value = reader.result;
+      thumbnailImageSrc.value = reader.result;
     };
-    reader.readAsDataURL(imagesForm.avatar);
+    reader.readAsDataURL(imagesForm.thumbnail);
   }
 }
 
@@ -61,13 +56,13 @@ function cancleCoverImage() {
   imagesForm.cover = null;
   coverImageSrc.value = null;
 }
-function cancleAvatarImage() {
-  imagesForm.avatar = null;
-  avatarImageSrc.value = null;
+function cancleThumbnailImage() {
+  imagesForm.thumbnail = null;
+  thumbnailImageSrc.value = null;
 }
 
 function submitCoverImage() {
-  imagesForm.post(route("profile.updateImages"), {
+  imagesForm.post(route("group.updateImages", props.group.slug), {
     onSuccess: () => {
         showNotification.value = true
       cancleCoverImage();
@@ -77,11 +72,11 @@ function submitCoverImage() {
     },
   });
 }
-function submitAvatarImage() {
-  imagesForm.post(route("profile.updateImages"), {
+function submitThumbnailImage() {
+  imagesForm.post(route("group.updateImages", props.group.slug), {
     onSuccess: () => {
         showNotification.value = true
-      cancleAvatarImage();
+      cancleThumbnailImage();
       setTimeout(() => {
         showNotification.value = false;
       }, 3000);
@@ -91,18 +86,18 @@ function submitAvatarImage() {
 </script>
 
 <template>
-    <Head title="Profile"/>
+    <Head title="Group"/>
   <AuthenticatedLayout>
     <div class="max-w-[768px] mx-auto h-full overflow-auto">
       <div v-show="showNotification && success" class="my-2 py-2 px-3 font-medium text-sm text-white bg-emerald-500">
         {{ success }}
       </div>
-      <div v-if="errors.cover" class="my-2 py-2 px-3 font-medium text-sm text-white bg-red-400">
-        {{ errors.cover }}
+      <div v-if="errors.thumbnail" class="my-2 py-2 px-3 font-medium text-sm text-white bg-red-400">
+        {{ errors.thumbnail }}
       </div>
       <div class="group relative bg-white">
-        <img :src="coverImageSrc || user.cover_url || '/img/default_cover.jpeg'" class="w-full h-[200px] object-cover" />
-        <div class="absolute top-2 right-2">
+        <img :src="coverImageSrc || group.cover_url || '/img/default_cover.jpeg'" class="w-full h-[200px] object-cover" />
+        <div v-if="isCurrentUserAdmin" class="absolute top-2 right-2">
           <button v-if="!coverImageSrc" class="bg-gray-50 hover:bg-gray-100 text-gray-800 py-1 px-2 text-xs rounded flex items-center opacity-0 group-hover:opacity-100 transition">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3 mr-2">
               <path
@@ -128,25 +123,29 @@ function submitAvatarImage() {
           </div>
         </div>
         <div class="flex">
-          <div class="flex item-center justify-center rounded-full relative group/avatar -mt-[64px] ml-[48px] w-[128px] h-[128px]">
-            <img :src="avatarImageSrc || user.avatar_url || '/img/default_avatar.jpeg'" class="w-full h-full object-cover rounded-full" />
-            <button v-if="!avatarImageSrc" class="absolute left-0 top-0 right-0 bottom-0 bg-black/50 text-gray-200 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100">
+          <div class="flex item-center justify-center rounded-full relative group/thumbnail -mt-[64px] ml-[48px] w-[128px] h-[128px]">
+            <img :src="thumbnailImageSrc || group.thumbnail_url" class="w-full h-full object-cover rounded-full" />
+            <button v-if="isCurrentUserAdmin && !thumbnailImageSrc" class="absolute left-0 top-0 right-0 bottom-0 bg-black/50 text-gray-200 rounded-full flex items-center justify-center opacity-0 group-hover/thumbnail:opacity-100">
               <CameraIcon class="w-8 h-8" />
-              <input type="file" class="absolute left-0 top-0 right-0 bottom-0 opacity-0" @change="onAvatarChange" />
+              <input type="file" class="absolute left-0 top-0 right-0 bottom-0 opacity-0" @change="onThumbnailChange" />
             </button>
-            <div v-else class="absolute top-1 right-0 flex flex-col gap-2">
-              <button @click="cancleAvatarImage" class="w-7 h-7 flex item-center justify-center bg-red-500/80 text-white rounded-full">
+            <div v-else-if="isCurrentUserAdmin" class="absolute top-1 right-0 flex flex-col gap-2">
+              <button @click="cancleThumbnailImage" class="w-7 h-7 flex item-center justify-center bg-red-500/80 text-white rounded-full">
                 <XMarkIcon class="h-5 w-5" />
               </button>
-              <button @click="submitAvatarImage" class="w-7 h-7 flex item-center justify-center bg-emerald-500/80 text-white rounded-full">
+              <button @click="submitThumbnailImage" class="w-7 h-7 flex item-center justify-center bg-emerald-500/80 text-white rounded-full">
                 <CheckCircleIcon class="h-5 w-5" />
               </button>
             </div>
           </div>
           <div class="flex justify-between items-center flex-1 p-4">
             <h2 class="font-bold text-lg">
-              {{ user.name }}
+              {{ group.name }}
             </h2>
+
+            <PrimaryButtonVue v-if="isCurrentUserAdmin">Invite User</PrimaryButtonVue>
+            <PrimaryButtonVue v-else-if="!group.role && group.auto_approval">Join to Group</PrimaryButtonVue>
+            <PrimaryButtonVue v-else-if="!group.role && !group.auto_approval">Request to Join</PrimaryButtonVue>
           </div>
         </div>
       </div>
@@ -165,9 +164,6 @@ function submitAvatarImage() {
             <Tab v-slot="{ selected }" as="template">
               <TabItem :selected="selected" text="Photos" />
             </Tab>
-            <Tab v-if="isMyProfile" v-slot="{ selected }" as="template">
-              <TabItem :selected="selected" text="My Profile" />
-            </Tab>
           </TabList>
 
           <TabPanels class="mt-2">
@@ -182,9 +178,6 @@ function submitAvatarImage() {
             </TabPanel>
             <TabPanel class="rounded-xl bg-white p-3 shadow">
               Photos
-            </TabPanel>
-            <TabPanel v-if="isMyProfile">
-              <Edit :must-verify-email="mustVerifyEmail" :status="status" />
             </TabPanel>
           </TabPanels>
         </TabGroup>

@@ -10,15 +10,22 @@ use App\Http\Requests\UpdateGroupsRequest;
 use App\Http\Resources\GroupResource;
 use App\Models\GroupUsers;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
 
 class GroupController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function profile(Groups $group)
     {
-        //
+        $group->load('currentUserGroup');
+        return Inertia::render('Group/View', [
+            'success' => session('success'),
+            'group' => new GroupResource($group)
+        ]);
     }
 
     /**
@@ -59,5 +66,46 @@ class GroupController extends Controller
     public function destroy(Groups $groups)
     {
         //
+    }
+
+    public function updateImage(Request $request, Groups $group)
+    {
+        if($group->isAdmin(Auth::id() ?? null) === false) {
+            return response('You are not allowed to update this group\'s image', 403);
+        }
+
+        $data = $request->validate([
+            'cover' => 'nullable|image|max:1024',
+            'thumbnail' => 'nullable|image|max:1024',
+        ]);
+
+
+        $cover  = $data['cover'] ?? null;
+        /** @var illuminate\Http\UploadedFile $cover */
+        $thumbnail = $data['thumbnail'] ?? null;
+
+        $success = '';
+        if ($cover) {
+            if($group->cover_path) {
+                Storage::disk('public')->delete($group->cover_path);
+            }
+            $path = $cover->store('group-' . $group->id, 'public');
+            $group->update([
+                'cover_path' => $path
+            ]);
+            $success = 'Your cover has been updated!';
+        }
+        if ($thumbnail) {
+            if($group->thumbnail_path) {
+                Storage::disk('public')->delete($group->thumbnail_path);
+            }
+            $path = $thumbnail->store('group-' . $group->id, 'public');
+            $group->update([
+                'thumbnail_path' => $path
+            ]);
+            $success = 'Your thumbnail has been updated!';
+        }
+
+        return back()->with('success', $success);
     }
 }
