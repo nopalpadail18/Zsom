@@ -85,6 +85,13 @@ function submitThumbnailImage() {
     },
   });
 }
+
+function joinToGroup()
+{
+    const form = useForm({})
+
+    form.post(route('group.join', props.group.slug))
+}
 </script>
 
 <template>
@@ -145,9 +152,21 @@ function submitThumbnailImage() {
               {{ group.name }}
             </h2>
 
-            <PrimaryButtonVue @click="showInviteUserModal = true" v-if="isCurrentUserAdmin">Invite User</PrimaryButtonVue>
-            <PrimaryButtonVue v-else-if="!group.role && group.auto_approval">Join to Group</PrimaryButtonVue>
-            <PrimaryButtonVue v-else-if="!group.role && !group.auto_approval">Request to Join</PrimaryButtonVue>
+            <PrimaryButtonVue v-if="!authUser" :href="route('login')">
+                Login to Join to this Group
+            </PrimaryButtonVue>
+            <PrimaryButtonVue v-if="isCurrentUserAdmin"
+                @click="showInviteUserModal = true">
+                Invite User
+            </PrimaryButtonVue>
+            <PrimaryButtonVue v-else-if="authUser && !group.role && group.auto_approval"
+                @click="joinToGroup">
+                Join to Group
+            </PrimaryButtonVue>
+            <PrimaryButtonVue v-else-if="authUser && !group.role && !group.auto_approval"
+                @click="joinToGroup">
+                Request to Join
+            </PrimaryButtonVue>
           </div>
         </div>
       </div>
