@@ -8,6 +8,7 @@ import { computed } from "vue";
 import { XMarkIcon, CheckCircleIcon, CameraIcon } from "@heroicons/vue/24/outline";
 import { Head,useForm } from "@inertiajs/vue3";
 import PrimaryButtonVue from "@/Components/PrimaryButton.vue";
+import InviteUserModalVue from "./InviteUserModal.vue";
 
 const imagesForm = useForm({
   thumbnail: null,
@@ -17,6 +18,7 @@ const imagesForm = useForm({
 const showNotification = ref(true);
 const coverImageSrc = ref("");
 const thumbnailImageSrc = ref("");
+const showInviteUserModal = ref(false);
 const authUser = usePage().props.auth.user;
 const isCurrentUserAdmin = computed(() => props.group.role === "admin");
 
@@ -143,7 +145,7 @@ function submitThumbnailImage() {
               {{ group.name }}
             </h2>
 
-            <PrimaryButtonVue v-if="isCurrentUserAdmin">Invite User</PrimaryButtonVue>
+            <PrimaryButtonVue @click="showInviteUserModal = true" v-if="isCurrentUserAdmin">Invite User</PrimaryButtonVue>
             <PrimaryButtonVue v-else-if="!group.role && group.auto_approval">Join to Group</PrimaryButtonVue>
             <PrimaryButtonVue v-else-if="!group.role && !group.auto_approval">Request to Join</PrimaryButtonVue>
           </div>
@@ -184,4 +186,5 @@ function submitThumbnailImage() {
       </div>
     </div>
   </AuthenticatedLayout>
+  <InviteUserModalVue v-model="showInviteUserModal" />
 </template>

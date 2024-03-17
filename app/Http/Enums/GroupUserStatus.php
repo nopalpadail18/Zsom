@@ -4,6 +4,6 @@ namespace App\Http\Enums;
 
 enum GroupUserStatus: string
 {
-    case PANDING = 'pending';
+    case PENDING = 'pending';
     case APPROVED = 'approved';
 }
