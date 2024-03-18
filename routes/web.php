@@ -44,6 +44,8 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/group/join/{group:slug}', [GroupController::class, 'join'])
         ->name('group.join');
+    Route::post('/group/approve-requests/{group:slug}', [GroupController::class, 'approveRequests'])
+        ->name('group.approveRequests');
 
     // Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

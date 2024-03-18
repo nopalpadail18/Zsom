@@ -1,7 +1,7 @@
 <script setup>
 import TextInput from "@/Components/TextInput.vue";
 import { ref } from "vue";
-import FollowingItem from "@/Components/app/FollowingItem.vue";
+// import UserListItem from "@/Components/app/UserListItem.vue";
 
 const searchKeyword = ref("");
 </script>
@@ -16,54 +16,7 @@ const searchKeyword = ref("");
             ko blm join
         </div>
         <div v-else>
-            <FollowingItem
-                image="https://picsum.photos/100"
-                title="My Friend"
-            />
-            <FollowingItem
-                image="https://picsum.photos/100"
-                title="My Friend"
-            />
-            <FollowingItem
-                image="https://picsum.photos/100"
-                title="My Friend"
-            />
-            <FollowingItem
-                image="https://picsum.photos/100"
-                title="My Friend"
-            />
-            <FollowingItem
-                image="https://picsum.photos/100"
-                title="My Friend"
-            />
-            <FollowingItem
-                image="https://picsum.photos/100"
-                title="My Friend"
-            />
-            <FollowingItem
-                image="https://picsum.photos/100"
-                title="My Friend"
-            />
-            <FollowingItem
-                image="https://picsum.photos/100"
-                title="My Friend"
-            />
-            <FollowingItem
-                image="https://picsum.photos/100"
-                title="My Friend"
-            />
-            <FollowingItem
-                image="https://picsum.photos/100"
-                title="My Friend"
-            />
-            <FollowingItem
-                image="https://picsum.photos/100"
-                title="My Friend"
-            />
-            <FollowingItem
-                image="https://picsum.photos/100"
-                title="My Friend"
-            />
+
         </div>
     </div>
 </template>
