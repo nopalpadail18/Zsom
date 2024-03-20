@@ -10,6 +10,7 @@ import { Head,useForm } from "@inertiajs/vue3";
 import PrimaryButtonVue from "@/Components/PrimaryButton.vue";
 import InviteUserModalVue from "./InviteUserModal.vue";
 import UserListItem from "@/Components/app/UserListItem.vue";
+import TextInput from "@/Components/TextInput.vue";
 
 const imagesForm = useForm({
   thumbnail: null,
@@ -70,6 +71,7 @@ function cancleThumbnailImage() {
 
 function submitCoverImage() {
   imagesForm.post(route("group.updateImages", props.group.slug), {
+    preserveScroll: true,
     onSuccess: () => {
         showNotification.value = true
       cancleCoverImage();
@@ -81,6 +83,7 @@ function submitCoverImage() {
 }
 function submitThumbnailImage() {
   imagesForm.post(route("group.updateImages", props.group.slug), {
+    preserveScroll: true,
     onSuccess: () => {
         showNotification.value = true
       cancleThumbnailImage();
@@ -95,7 +98,9 @@ function joinToGroup()
 {
     const form = useForm({})
 
-    form.post(route('group.join', props.group.slug))
+    form.post(route('group.join', props.group.slug),{
+        preserveScroll: true
+    })
 }
 
 function approveUser(user)
@@ -105,7 +110,9 @@ function approveUser(user)
         action: 'approve'
     })
 
-    form.post(route('group.approveRequests', props.group.slug))
+    form.post(route('group.approveRequests', props.group.slug),{
+        preserveScroll: true
+    })
 
 }
 function rejectUser(user)
@@ -115,8 +122,22 @@ function rejectUser(user)
         action: 'reject'
     })
 
-    form.post(route('group.approveRequests', props.group.slug))
+    form.post(route('group.approveRequests', props.group.slug),{
+        preserveScroll: true
+    })
 
+}
+
+function onRoleChange(user, role)
+{
+    const form = useForm({
+        user_id: user.id,
+        role
+    })
+
+    form.post(route('group.changeRole', props.group.slug),{
+        preserveScroll: true
+    })
 }
 </script>
 
@@ -234,6 +255,9 @@ function rejectUser(user)
                         v-for="user of users"
                         :user="user"
                         :key="user.id"
+                        :show-role-dropdown="isCurrentUserAdmin"
+                        :disable-role-dropdown="group.user_id === user.id"
+                        @role-change="onRoleChange"
                         class="shadow rounded-md"
                         />
                 </div>

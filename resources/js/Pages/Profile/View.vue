@@ -68,6 +68,7 @@ function cancleAvatarImage() {
 
 function submitCoverImage() {
   imagesForm.post(route("profile.updateImages"), {
+    preserveScroll:true,
     onSuccess: () => {
         showNotification.value = true
       cancleCoverImage();
@@ -79,6 +80,7 @@ function submitCoverImage() {
 }
 function submitAvatarImage() {
   imagesForm.post(route("profile.updateImages"), {
+    preserveScroll:true,
     onSuccess: () => {
         showNotification.value = true
       cancleAvatarImage();
