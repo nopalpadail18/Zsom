@@ -36,6 +36,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/update-images', [ProfileController::class, 'updateImage'])
         ->name('profile.updateImages');
 
+    //Groups
+    Route::post('/group', [GroupController::class, 'store'])
+    ->name('group.create');
+
+    Route::put('/group/{groups:slug}', [GroupController::class, 'update'])
+    ->name('group.update');
+
     Route::post('/group/update-images/{group:slug}', [GroupController::class, 'updateImage'])
         ->name('group.updateImages');
 
@@ -54,7 +61,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post('/post', [PostController::class, 'store'])->name('posts.create');
     Route::put('/post/{post}', [PostController::class, 'update'])->name('posts.update');
-    Route::delete('/post/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+    Route::delete('/post/{posts}', [PostController::class, 'destroy'])->name('posts.destroy');
     Route::get('/post/download/{attachment}', [PostController::class, 'downloadAttachment'])
         ->name('post.download');
     Route::post('/post/{post}/reaction', [PostController::class, 'postReaction'])
@@ -66,11 +73,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/comment/{comment}', [PostController::class, 'updateComment'])
         ->name('comment.update');
     Route::post('/comment/{comment}/reaction', [PostController::class, 'commentReaction'])
-        ->name('comment.reaction');
-    //Groups
-    Route::post('/group', [GroupController::class, 'store'])
-        ->name('group.create');
-
+    ->name('comment.reaction');
 });
 
 require __DIR__ . '/auth.php';

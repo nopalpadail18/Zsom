@@ -49,8 +49,6 @@ class Groups extends Model
             ->where('group_id', $this->id)
             ->where('role', GroupUserRole::ADMIN->value)
             ->exists();
-        // return $this->currentUserGroup?->user_id === $userId
-        //     && $this->currentUserGroup?->role === GroupUserRole::ADMIN->value;
     }
     public function isOwner($userId): bool
     {

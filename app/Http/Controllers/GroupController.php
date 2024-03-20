@@ -78,7 +78,9 @@ class GroupController extends Controller
      */
     public function update(UpdateGroupsRequest $request, Groups $groups)
     {
-        //
+        $groups->update($request->validated());
+
+        return back()->with('success', 'Your group has been updated!');
     }
 
     /**

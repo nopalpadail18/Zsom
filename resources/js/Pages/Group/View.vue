@@ -11,6 +11,7 @@ import PrimaryButtonVue from "@/Components/PrimaryButton.vue";
 import InviteUserModalVue from "./InviteUserModal.vue";
 import UserListItem from "@/Components/app/UserListItem.vue";
 import TextInput from "@/Components/TextInput.vue";
+import GroupForm from "../../Components/app/GroupForm.vue";
 
 const imagesForm = useForm({
   thumbnail: null,
@@ -38,6 +39,12 @@ const props = defineProps({
   users: Array,
   requests: Array,
 });
+
+const aboutForm = useForm({
+    name: usePage().props.group.name,
+    auto_approval: !!parseInt(usePage().props.group.auto_approval),
+    about: usePage().props.group.about,
+})
 
 function onCoverChange(e) {
   imagesForm.cover = e.target.files[0];
@@ -139,6 +146,13 @@ function onRoleChange(user, role)
         preserveScroll: true
     })
 }
+
+function updateGroup() {
+    aboutForm.put(route('group.update', props.group.slug), {
+        preserveScroll: true
+    })
+}
+
 </script>
 
 <template>
@@ -236,6 +250,9 @@ function onRoleChange(user, role)
             <Tab v-slot="{ selected }" as="template">
               <TabItem :selected="selected" text="Photos" />
             </Tab>
+            <Tab v-if="isCurrentUserAdmin" v-slot="{ selected }" as="template">
+              <TabItem :selected="selected" text="About" />
+            </Tab>
           </TabList>
 
           <TabPanels class="mt-2">
@@ -280,6 +297,10 @@ function onRoleChange(user, role)
             </TabPanel>
             <TabPanel class="rounded-xl bg-white p-3 shadow">
               Photos
+            </TabPanel>
+            <TabPanel class="rounded-xl bg-white p-3 shadow">
+              <GroupForm :form="aboutForm"/>
+              <PrimaryButtonVue @click="updateGroup">Submit</PrimaryButtonVue>
             </TabPanel>
           </TabPanels>
         </TabGroup>
