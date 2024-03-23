@@ -7,6 +7,7 @@ use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdateCommentRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Http\Resources\CommentResource;
+use App\Http\Resources\PostResource;
 use App\Models\Comments;
 use App\Models\PostAttachments;
 use App\Models\Posts;
@@ -27,6 +28,18 @@ use Illuminate\Validation\Rule;
 
 class PostController extends Controller
 {
+
+    public function view(Posts $post)
+    {
+        $post->loadCount('reactions');
+        $post->load([
+            'comments' => fn ($query) => $query->withCount('reactions'),
+        ]);
+        return inertia('Post/View', [
+            'post' => new PostResource($post),
+        ]);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -216,7 +229,7 @@ class PostController extends Controller
         ]);
 
         $post = $comment->post;
-        $post->user->notify(new CommentCreated($comment));
+        $post->user->notify(new CommentCreated($comment, $post));
 
         return response(new CommentResource($comment), 201);
     }
