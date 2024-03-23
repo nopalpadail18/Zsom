@@ -11,11 +11,17 @@ use App\Models\Comments;
 use App\Models\PostAttachments;
 use App\Models\Posts;
 use App\Models\Reactions;
+use App\Models\User;
+use App\Notifications\CommentCreated;
 use App\Notifications\CommentDeleted;
+use App\Notifications\PostCreated;
 use App\Notifications\PostDeleted;
+use App\Notifications\ReactionAddedOnComment;
+use App\Notifications\ReactionAddedOnPost;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -26,19 +32,24 @@ class PostController extends Controller
      */
     public function store(StorePostRequest $request)
     {
+        // Validasi data yang diterima dari permintaan HTTP menggunakan aturan yang didefinisikan di dalam StorePostRequest
         $data = $request->validated();
+        // Mendapatkan objek pengguna yang saat ini terautentikasi
         $user = $request->user();
-
+        // Memulai transaksi database
         DB::beginTransaction();
         $allFilePath = [];
         try {
+            // Membuat entri baru dalam tabel Posts menggunakan data yang diterima dari permintaan HTTP
             $post = Posts::create($data);
-
-            /** @var \Illuminate\Http\UploadedFile[] $files */
+            // Mendapatkan daftar lampiran yang diunggah dari data yang diterima atau menginisialisasi array kosong jika tidak ada lampiran yang diunggah
             $files = $data['attachments'] ?? [];
             foreach ($files as $file) {
+                // Menyimpan file terlampir ke penyimpanan yang ditentukan ('public') dan mendapatkan jalur penyimpanannya
                 $path = $file->store('attachments/' . $post->id, 'public');
                 $allFilePath[] = $path;
+
+                // Membuat entri baru dalam tabel PostAttachments untuk setiap lampiran yang diunggah
                 PostAttachments::create([
                     'post_id' => $post->id,
                     'name' => $file->getClientOriginalName(),
@@ -48,16 +59,28 @@ class PostController extends Controller
                     'created_by' => $user->id,
                 ]);
             }
-
+            // Menyelesaikan transaksi database
             DB::commit();
+
+            // Kirim notifikasi ke pengguna yang terautentikasi
+            $group = $post->group;
+
+            if ($group) {
+                $users = $group->approvedUsers()->where('users.id', '!=', $user->id)->get();
+                Notification::send($users, new PostCreated($post, $group));
+            }
         } catch (\Exception $e) {
+            // Jika terjadi pengecualian selama proses transaksi, hapus semua file yang telah diunggah
             foreach ($allFilePath as $path) {
                 Storage::disk('public')->delete($path);
             }
+            // Rollback transaksi database
             DB::rollBack();
+            // Lepaskan pengecualian agar dapat ditangani lebih lanjut
             throw $e;
         }
 
+        // Kembalikan pengguna ke halaman sebelumnya setelah berhasil menyimpan postingan
         return back();
     }
 
@@ -163,6 +186,11 @@ class PostController extends Controller
                 'user_id' => $userId,
                 'type' => $data['reaction'],
             ]);
+
+            if (!$post->isOwner($userId)) {
+                $user = User::where('id', $userId)->first();
+                $post->user->notify(new ReactionAddedOnPost($post, $user));
+            }
         }
 
         $reactions = Reactions::where('object_id', $post->id)->where('object_type', Posts::class)->count();
@@ -186,6 +214,9 @@ class PostController extends Controller
             'user_id' => Auth::id(),
             'parent_id' => $data['parent_id'] ?: null,
         ]);
+
+        $post = $comment->post;
+        $post->user->notify(new CommentCreated($comment));
 
         return response(new CommentResource($comment), 201);
     }
@@ -241,6 +272,11 @@ class PostController extends Controller
                 'user_id' => $userId,
                 'type' => $data['reaction'],
             ]);
+
+            if (!$comment->isOwner($userId)) {
+                $user = User::where('id', $userId)->first();
+                $comment->user->notify(new ReactionAddedOnComment($comment->post, $comment, $user));
+            }
         }
 
         $reactions = Reactions::where('object_id', $comment->id)->where('object_type', Comments::class)->count();

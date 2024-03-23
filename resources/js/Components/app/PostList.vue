@@ -2,10 +2,9 @@
 import { usePage } from "@inertiajs/vue3";
 import PostItem from "./PostItem.vue";
 import PostModal from "./PostModal.vue";
-import { onMounted, onUpdated, ref } from "vue";
+import { onMounted, ref } from "vue";
 import AttachmentPreviewModal from "./AttachmentPreviewModal.vue";
 import axiosClient from "@/axiosClient";
-import { watchEffect } from "vue";
 import { watch } from "vue";
 
 const page = usePage();
@@ -26,20 +25,8 @@ const props = defineProps({
     posts: Array,
 });
 
-// watch(
-//     () => ({
-//         data: page.props.posts.data,
-//         next: page.props.posts.links.next,
-//     }),
-//     (newAllPosts) => {
-//         allPosts.value = newAllPosts;
-//     },
-//     { deep: true }
-// );
 watch(
-    () => {
-        page.props.posts;
-    },
+    () => page.props.posts,
     () => {
         if (page.props.posts) {
             allPosts.value = {
