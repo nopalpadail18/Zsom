@@ -138,6 +138,24 @@ function rejectUser(user) {
     });
 }
 
+function deleteUser(user) {
+    if (
+        !window.confirm(
+            `Are you sure you want to delete "${user.name}" from this group?`
+        )
+    ) {
+        return false;
+    }
+
+    const form = useForm({
+        user_id: user.id,
+    });
+
+    form.delete(route("group.removeUser", props.group.slug), {
+        preserveScroll: true,
+    });
+}
+
 function onRoleChange(user, role) {
     const form = useForm({
         user_id: user.id,
@@ -379,6 +397,7 @@ function updateGroup() {
                                         group.user_id === user.id
                                     "
                                     @role-change="onRoleChange"
+                                    @delete="deleteUser"
                                     class="shadow rounded-md"
                                 />
                             </div>

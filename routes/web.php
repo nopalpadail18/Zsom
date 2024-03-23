@@ -38,10 +38,10 @@ Route::middleware('auth')->group(function () {
 
     //Groups
     Route::post('/group', [GroupController::class, 'store'])
-    ->name('group.create');
+        ->name('group.create');
 
     Route::put('/group/{groups:slug}', [GroupController::class, 'update'])
-    ->name('group.update');
+        ->name('group.update');
 
     Route::post('/group/update-images/{group:slug}', [GroupController::class, 'updateImage'])
         ->name('group.updateImages');
@@ -53,6 +53,8 @@ Route::middleware('auth')->group(function () {
         ->name('group.join');
     Route::post('/group/approve-requests/{group:slug}', [GroupController::class, 'approveRequests'])
         ->name('group.approveRequests');
+    Route::delete('/group/remove-user/{group:slug}', [GroupController::class, 'removeUser'])
+        ->name('group.removeUser');
     Route::post('/group/change-role/{group:slug}', [GroupController::class, 'changeRole'])
         ->name('group.changeRole');
 
@@ -73,7 +75,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/comment/{comment}', [PostController::class, 'updateComment'])
         ->name('comment.update');
     Route::post('/comment/{comment}/reaction', [PostController::class, 'commentReaction'])
-    ->name('comment.reaction');
+        ->name('comment.reaction');
 });
 
 require __DIR__ . '/auth.php';
