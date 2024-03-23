@@ -5,6 +5,8 @@ import PostModal from "./PostModal.vue";
 import { onMounted, onUpdated, ref } from "vue";
 import AttachmentPreviewModal from "./AttachmentPreviewModal.vue";
 import axiosClient from "@/axiosClient";
+import { watchEffect } from "vue";
+import { watch } from "vue";
 
 const page = usePage();
 
@@ -16,15 +18,38 @@ const previeAttachmentsPost = ref({});
 const loadMoreIntersec = ref(null);
 
 const allPosts = ref({
-    data: page.props.posts.data,
-    next: page.props.posts.links.next,
+    data: [],
+    next: null,
 });
 
 const props = defineProps({
     posts: Array,
 });
 
-
+// watch(
+//     () => ({
+//         data: page.props.posts.data,
+//         next: page.props.posts.links.next,
+//     }),
+//     (newAllPosts) => {
+//         allPosts.value = newAllPosts;
+//     },
+//     { deep: true }
+// );
+watch(
+    () => {
+        page.props.posts;
+    },
+    () => {
+        if (page.props.posts) {
+            allPosts.value = {
+                data: page.props.posts.data,
+                next: page.props.posts.links.next,
+            };
+        }
+    },
+    { deep: true, immediate: true }
+);
 
 function openEditModal(post) {
     editPost.value = post;
@@ -44,27 +69,27 @@ function onModalHide() {
     };
 }
 
-function loadMore(){
-
+function loadMore() {
     if (!allPosts.value.next) {
-        return
+        return;
     }
-    axiosClient.get(allPosts.value.next)
-        .then(({ data }) => {
-            allPosts.value.data = [...allPosts.value.data, ...data.data]
-            allPosts.value.next = data.links.next
-        })
+    axiosClient.get(allPosts.value.next).then(({ data }) => {
+        allPosts.value.data = [...allPosts.value.data, ...data.data];
+        allPosts.value.next = data.links.next;
+    });
 }
 
 onMounted(() => {
-    const observer = new IntersectionObserver((entries) =>
-        entries.forEach((entry) => entry.isIntersecting && loadMore()), {
+    const observer = new IntersectionObserver(
+        (entries) =>
+            entries.forEach((entry) => entry.isIntersecting && loadMore()),
+        {
             rootMargin: "-250px 0px 0px 0px",
         }
-    )
+    );
 
-    observer.observe(loadMoreIntersec.value)
-})
+    observer.observe(loadMoreIntersec.value);
+});
 </script>
 <template>
     <div class="overflow-auto">

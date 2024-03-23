@@ -50,6 +50,14 @@ class Groups extends Model
             ->where('role', GroupUserRole::ADMIN->value)
             ->exists();
     }
+    public function hasApprovedUser($userId): bool
+    {
+        return GroupUsers::query()
+            ->where('user_id', $userId)
+            ->where('group_id', $this->id)
+            ->where('status', GroupUserStatus::APPROVED->value)
+            ->exists();
+    }
     public function isOwner($userId): bool
     {
         return $this->user_id == $userId;

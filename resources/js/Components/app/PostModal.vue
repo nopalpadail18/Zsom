@@ -37,6 +37,10 @@ const props = defineProps({
         type: Object,
         required: true,
     },
+    group: {
+        type: Object,
+        default: null,
+    },
     modelValue: Boolean,
 });
 
@@ -45,6 +49,7 @@ const attachmentExtentions = usePage().props.attachmentExtentions;
 const form = useForm({
     body: "",
     attachments: [],
+    group_id: null,
     deleted_file_ids: [],
     _method: "POST",
 });
@@ -97,6 +102,9 @@ function resetModal() {
 }
 
 function submit() {
+    if (props.group) {
+        form.group_id = props.group.id;
+    }
     form.attachments = attachmentFiles.value.map((myFile) => myFile.file);
     if (props.post.id) {
         form._method = "PUT";
@@ -236,6 +244,13 @@ function undoDeleted(myFile) {
                                         :show-time="false"
                                         class="mb-4"
                                     />
+
+                                    <div
+                                        v-if="formErrors.group_id"
+                                        class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-3"
+                                    >
+                                        {{ formErrors.group_id }}
+                                    </div>
 
                                     <ckeditor
                                         :editor="editor"

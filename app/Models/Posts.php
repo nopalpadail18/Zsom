@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\User;
 use App\Models\Groups;
 use App\Models\PostAttachments;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,7 +18,7 @@ class Posts extends Model
     use HasFactory;
     use SoftDeletes;
 
-    protected $fillable = ['body', 'user_id'];
+    protected $fillable = ['body', 'user_id', 'group_id'];
 
     public function user(): BelongsTo
     {
@@ -46,5 +47,19 @@ class Posts extends Model
     public function latest5Comments(): HasMany
     {
         return $this->hasMany(Comments::class, 'post_id', 'id');
+    }
+
+    public static function postForTimeLine($userId): Builder
+    {
+        return   Posts::query()
+            ->withCount('reactions')
+            ->with([
+                'comments' => function ($q) {
+                    $q->withCount('reactions');
+                },
+                'reactions' => function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                }
+            ])->latest();
     }
 }

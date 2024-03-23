@@ -10,8 +10,10 @@ use App\Http\Requests\StoreGroupsRequest;
 use App\Http\Requests\UpdateGroupsRequest;
 use App\Http\Resources\GroupResource;
 use App\Http\Resources\GroupUserResource;
+use App\Http\Resources\PostResource;
 use App\Http\Resources\UserResource;
 use App\Models\GroupUsers;
+use App\Models\Posts;
 use App\Models\User;
 use App\Notifications\InvitationApproved;
 use App\Notifications\InvitationInGroup;
@@ -31,9 +33,31 @@ class GroupController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function profile(Groups $group)
+    public function profile(Request $request, Groups $group)
     {
         $group->load('currentUserGroup');
+
+        $userId = Auth::id();
+
+        if ($group->hasApprovedUser($userId)) {
+            $posts = Posts::postForTimeLine($userId)
+                ->where('group_id', $group->id)->paginate(10);
+
+            $posts = PostResource::collection($posts);
+        } else {
+            return  Inertia::render('Group/View', [
+                'success' => session('success'),
+                'group' => new GroupResource($group),
+                'posts' => null,
+                'users' => [],
+                'requests' => []
+            ]);
+        }
+
+        if ($request->wantsJson()) {
+            return PostResource::collection($posts);
+        }
+
         $users = User::query()
             ->select(['users.*', 'gu.role', 'gu.status', 'gu.group_id'])
             ->join('group_users as gu', 'gu.user_id', '=', 'users.id')
@@ -44,6 +68,7 @@ class GroupController extends Controller
         return Inertia::render('Group/View', [
             'success' => session('success'),
             'group' => new GroupResource($group),
+            'posts' => $posts,
             'users' => GroupUserResource::collection($users),
             'requests' => UserResource::collection($requests)
         ]);
@@ -93,7 +118,7 @@ class GroupController extends Controller
 
     public function updateImage(Request $request, Groups $group)
     {
-        if($group->isAdmin(Auth::id() ?? null) === false) {
+        if ($group->isAdmin(Auth::id() ?? null) === false) {
             return response('You are not allowed to update this group\'s image', 403);
         }
 
@@ -109,7 +134,7 @@ class GroupController extends Controller
 
         $success = '';
         if ($cover) {
-            if($group->cover_path) {
+            if ($group->cover_path) {
                 Storage::disk('public')->delete($group->cover_path);
             }
             $path = $cover->store('group-' . $group->id, 'public');
@@ -119,7 +144,7 @@ class GroupController extends Controller
             $success = 'Your cover has been updated!';
         }
         if ($thumbnail) {
-            if($group->thumbnail_path) {
+            if ($group->thumbnail_path) {
                 Storage::disk('public')->delete($group->thumbnail_path);
             }
             $path = $thumbnail->store('group-' . $group->id, 'public');
@@ -141,7 +166,7 @@ class GroupController extends Controller
         $hours = 24;
         $token = Str::random(256);
 
-        if($groupUser){
+        if ($groupUser) {
             $groupUser->delete();
         }
 
@@ -165,11 +190,11 @@ class GroupController extends Controller
         $groupUser = GroupUsers::query()->where('token', $token)->first();
 
         $errorTitle = '';
-        if(!$groupUser){
+        if (!$groupUser) {
             $errorTitle = 'The link is not valid';
-        } else if($groupUser->token_used || $groupUser->status === GroupUserStatus::APPROVED->value){
+        } else if ($groupUser->token_used || $groupUser->status === GroupUserStatus::APPROVED->value) {
             $errorTitle = 'The link has been used';
-        } else if($groupUser->token_expire_date < now()){
+        } else if ($groupUser->token_expire_date < now()) {
             $errorTitle = 'The link has expired';
         }
 
@@ -195,7 +220,7 @@ class GroupController extends Controller
 
         $successMessage = 'You joined to group "' . $group->name . '"';
         $status = GroupUserStatus::APPROVED->value;
-        if(!$group->auto_approval){
+        if (!$group->auto_approval) {
             $status = GroupUserStatus::PENDING->value;
             Notification::send($group->adminUsers, new RequestToJoinGroup($group, $user));
             $successMessage = 'You request has been accepted. You will be notified once you will be approved';
@@ -243,7 +268,7 @@ class GroupController extends Controller
 
             $user->notify(new RequestApproved($groupUser->group, $user, $approved));
 
-            return back()->with('success', 'User "'.$user->name.'" was '.($approved ? 'approved' : 'rejected'));
+            return back()->with('success', 'User "' . $user->name . '" was ' . ($approved ? 'approved' : 'rejected'));
         }
 
         return back();
