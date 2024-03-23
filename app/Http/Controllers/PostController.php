@@ -11,6 +11,8 @@ use App\Models\Comments;
 use App\Models\PostAttachments;
 use App\Models\Posts;
 use App\Models\Reactions;
+use App\Notifications\CommentDeleted;
+use App\Notifications\PostDeleted;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -115,14 +117,18 @@ class PostController extends Controller
      */
     public function destroy(Posts $posts)
     {
-        $user = Auth::id();
-        if ($posts->user_id !== $user) {
-            return response('You are not allowed to delete this post', 403);
+        $id = Auth::id();
+        if ($posts->isOwner($id) || $posts->group && $posts->group->isAdmin($id)) {
+            $posts->delete();
+
+            if (!$posts->isOwner($id)) {
+                $posts->user->notify(new PostDeleted($posts->group));
+            }
+
+            return back();
         }
 
-        $posts->delete();
-
-        return back();
+        return response('You are not allowed to delete this post', 403);
     }
 
     public function downloadAttachment(PostAttachments $attachment)
@@ -186,13 +192,19 @@ class PostController extends Controller
 
     public function deleteComment(Comments $comment)
     {
-        if ($comment->user_id !== Auth::id()) {
-            return response('You are not allowed to delete this comment', 403);
+        $posts = $comment->post;
+        $id = Auth::id();
+        if ($comment->isOwner($id) ||  $posts->isOwner($id)) {
+            $comment->delete();
+
+            if (!$comment->isOwner($id)) {
+                $comment->user->notify(new CommentDeleted($comment, $posts));
+            }
+
+            return response('', 204);
         }
 
-        $comment->delete();
-
-        return response('', 204);
+        return response('You are not allowed to delete this comment', 403);
     }
 
     public function updateComment(UpdateCommentRequest $request, Comments $comment)

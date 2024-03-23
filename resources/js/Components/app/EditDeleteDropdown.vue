@@ -6,12 +6,42 @@ import {
     EllipsisVerticalIcon,
 } from "@heroicons/vue/20/solid";
 import { usePage } from "@inertiajs/vue3";
+import { computed } from "vue";
 
-defineProps({
-    user: Object,
+const props = defineProps({
+    post: {
+        type: Object,
+        default: null,
+    },
+    comment: {
+        type: Object,
+        default: null,
+    },
 });
 
 const authUser = usePage().props.auth.user;
+
+// Membuat properti terkomputasi `user`, yang bergantung pada props.comment dan props.post.
+// Jika props.comment tidak ada, maka user akan menjadi props.post.user.
+// Jika props.comment ada, maka user akan menjadi props.comment.user.
+const user = computed(() => props.comment?.user || props.post?.user);
+
+// Membuat properti terkomputasi `editAllowed`, yang bergantung pada nilai `user` dan `authUser`.
+// Jika `user` memiliki id yang sama dengan `authUser.id`, maka editAllowed akan menjadi true.
+const editAllowed = computed(() => user.value.id === authUser.id);
+
+// Membuat properti terkomputasi `deleteAllowed` untuk menentukan apakah pengguna diizinkan untuk menghapus.
+const deleteAllowed = computed(() => {
+    // Jika pengguna yang sedang terautentikasi adalah pemilik komentar, maka diizinkan untuk menghapus.
+    if (user.value.id === authUser.id) return true;
+
+    // Jika pengguna yang sedang terautentikasi adalah pemilik postingan, maka diizinkan untuk menghapus.
+    if (props.post.user.id === authUser.id) return true;
+
+    // Jika tidak ada komentar dan pengguna adalah administrator dari grup postingan, maka diizinkan untuk menghapus.
+    return !props.comment && props.post.group?.role === "admin";
+});
+
 
 defineEmits(["edit", "delete"]);
 </script>
@@ -37,10 +67,7 @@ defineEmits(["edit", "delete"]);
                 class="absolute z-20 right-0 mt-2 w-32 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none"
             >
                 <div class="px-1 py-1">
-                    <MenuItem
-                        v-if="authUser.id === user.id"
-                        v-slot="{ active }"
-                    >
+                    <MenuItem v-if="editAllowed" v-slot="{ active }">
                         <button
                             @click="$emit('edit')"
                             :class="[
@@ -57,10 +84,7 @@ defineEmits(["edit", "delete"]);
                             Edit
                         </button>
                     </MenuItem>
-                    <MenuItem
-                        v-if="authUser.id === user.id"
-                        v-slot="{ active }"
-                    >
+                    <MenuItem v-if="deleteAllowed" v-slot="{ active }">
                         <button
                             @click="$emit('delete')"
                             :class="[
