@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Redirect;
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Followers;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Storage;
 
@@ -22,10 +23,18 @@ class ProfileController extends Controller
 
     public function index(User $user)
     {
+        $isCurrentUserFollower = false;
+        if (!Auth::guest()) {
+            $isCurrentUserFollower = Followers::where('user_id', $user->id)
+                ->where('follower_id', Auth::id())->exists();
+        }
+        $followersCount = Followers::where('user_id', $user->id)->count();
         return Inertia::render('Profile/View', [
             'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => session('status'),
             'success' => session('success'),
+            'isCurrentUserFollower' => $isCurrentUserFollower,
+            'followersCount' => $followersCount,
             'user' => new UserResource($user)
         ]);
     }
@@ -80,7 +89,7 @@ class ProfileController extends Controller
 
         $success = '';
         if ($cover) {
-            if($user->cover_path) {
+            if ($user->cover_path) {
                 Storage::disk('public')->delete($user->cover_path);
             }
             $path = $cover->store('user-' . $user->id, 'public');
@@ -90,7 +99,7 @@ class ProfileController extends Controller
             $success = 'Your cover has been updated!';
         }
         if ($avatar) {
-            if($user->avatar_path) {
+            if ($user->avatar_path) {
                 Storage::disk('public')->delete($user->avatar_path);
             }
             $path = $avatar->store('user-' . $user->id, 'public');
