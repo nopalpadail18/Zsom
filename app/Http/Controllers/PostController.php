@@ -82,6 +82,10 @@ class PostController extends Controller
                 $users = $group->approvedUsers()->where('users.id', '!=', $user->id)->get();
                 Notification::send($users, new PostCreated($post, $group));
             }
+
+            $followers = $user->followers;
+
+            Notification::send($followers, new PostCreated($post, $user, null));
         } catch (\Exception $e) {
             // Jika terjadi pengecualian selama proses transaksi, hapus semua file yang telah diunggah
             foreach ($allFilePath as $path) {

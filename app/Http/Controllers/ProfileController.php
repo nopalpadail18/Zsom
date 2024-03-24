@@ -32,16 +32,8 @@ class ProfileController extends Controller
         }
         $followersCount = Followers::where('user_id', $user->id)->count();
 
-        $followers = User::query()
-            ->select('users.*')
-            ->join('followers AS f', 'f.follower_id', '=', 'users.id')
-            ->where('f.user_id', $user->id)
-            ->get();
-        $following = User::query()
-            ->select('users.*')
-            ->join('followers AS f', 'f.user_id', '=', 'users.id')
-            ->where('f.follower_id', $user->id)
-            ->get();
+        $followers = $user->followers;
+        $following = $user->followings;
 
         $posts = Posts::postForTimeLine(Auth::id())
             ->where('user_id', $user->id)
