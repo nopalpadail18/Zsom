@@ -51,7 +51,7 @@ const props = defineProps({
 const aboutForm = useForm({
     name: usePage().props.group.name,
     auto_approval: !!parseInt(usePage().props.group.auto_approval),
-    about: usePage().props.group.about,
+    about: usePage().props.group.about.replace(/(<([^>]+)>)/gi, ""),
 });
 
 function onCoverChange(e) {

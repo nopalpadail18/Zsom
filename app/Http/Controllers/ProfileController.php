@@ -11,7 +11,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Redirect;
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Http\Resources\PostResource;
 use App\Models\Followers;
+use App\Models\Posts;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Storage;
 
@@ -21,7 +23,7 @@ class ProfileController extends Controller
      * Display the user's profile form.
      */
 
-    public function index(User $user)
+    public function index(Request $request, User $user)
     {
         $isCurrentUserFollower = false;
         if (!Auth::guest()) {
@@ -29,13 +31,36 @@ class ProfileController extends Controller
                 ->where('follower_id', Auth::id())->exists();
         }
         $followersCount = Followers::where('user_id', $user->id)->count();
+
+        $followers = User::query()
+            ->select('users.*')
+            ->join('followers AS f', 'f.follower_id', '=', 'users.id')
+            ->where('f.user_id', $user->id)
+            ->get();
+        $following = User::query()
+            ->select('users.*')
+            ->join('followers AS f', 'f.user_id', '=', 'users.id')
+            ->where('f.follower_id', $user->id)
+            ->get();
+
+        $posts = Posts::postForTimeLine(Auth::id())
+            ->where('user_id', $user->id)
+            ->paginate(10);
+        $posts = PostResource::collection($posts);
+        if ($request->wantsJson()) {
+            return $posts;
+        }
+
         return Inertia::render('Profile/View', [
             'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => session('status'),
             'success' => session('success'),
             'isCurrentUserFollower' => $isCurrentUserFollower,
             'followersCount' => $followersCount,
-            'user' => new UserResource($user)
+            'user' => new UserResource($user),
+            'posts' => $posts,
+            'followers' => UserResource::collection($followers),
+            'followings' => UserResource::collection($following),
         ]);
     }
 

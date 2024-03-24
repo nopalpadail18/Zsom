@@ -14,10 +14,6 @@ import {
 import { Head, useForm } from "@inertiajs/vue3";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import DangerButton from "@/Components/DangerButton.vue";
-import CreatePost from "@/Components/app/CreatePost.vue";
-import PostList from "@/Components/app/PostList.vue";
-import UserListItem from "@/Components/app/UserListItem.vue";
-import TextInput from "@/Components/TextInput.vue";
 
 const imagesForm = useForm({
     cover: null,
@@ -27,8 +23,6 @@ const imagesForm = useForm({
 const showNotification = ref(true);
 const coverImageSrc = ref("");
 const avatarImageSrc = ref("");
-const searchFollowersKeyword = ref("");
-const searchFollowingsKeyword = ref("");
 const authUser = usePage().props.auth.user;
 const isMyProfile = computed(() => authUser && authUser.id === props.user.id);
 
@@ -48,9 +42,6 @@ const props = defineProps({
     user: {
         type: Object,
     },
-    posts: Object,
-    followers: Array,
-    followings: Array,
 });
 
 function onCoverChange(e) {
@@ -246,7 +237,7 @@ function followUser() {
                                 {{ followersCount }} followers
                             </p>
                         </div>
-                        <div v-if="authUser.id !== user.id">
+                        <div>
                             <PrimaryButton
                                 v-if="!isCurrentUserFollower"
                                 @click="followUser"
@@ -261,84 +252,35 @@ function followUser() {
                 </div>
             </div>
             <div class="border-t">
-                <TabGroup>
+                <TabItem :selected="flase" text="Posts" />
+                <TabItem :selected="flase" text="Followers" />
+                <TabItem :selected="flase" text="Followings" />
+                <TabItem :selected="flase" text="Photos" />
+                <TabItem :selected="flase" text="My Profile" />
+
+                <!-- <TabGroup>
                     <TabList class="flex bg-white">
-                        <Tab v-slot="{ selected }" as="template">
-                            <TabItem :selected="selected" text="Posts" />
-                        </Tab>
-                        <Tab v-slot="{ selected }" as="template">
-                            <TabItem :selected="selected" text="Followers" />
-                        </Tab>
-                        <Tab v-slot="{ selected }" as="template">
-                            <TabItem :selected="selected" text="Followings" />
-                        </Tab>
-                        <Tab v-slot="{ selected }" as="template">
-                            <TabItem :selected="selected" text="Photos" />
-                        </Tab>
+                        <Tab v-slot="{ selected }" as="template"> </Tab>
+                        <Tab v-slot="{ selected }" as="template"> </Tab>
+                        <Tab v-slot="{ selected }" as="template"> </Tab>
+                        <Tab v-slot="{ selected }" as="template"> </Tab>
                         <Tab
                             v-if="isMyProfile"
                             v-slot="{ selected }"
                             as="template"
                         >
-                            <TabItem :selected="selected" text="My Profile" />
                         </Tab>
                     </TabList>
 
                     <TabPanels class="mt-2">
-                        <TabPanel>
-                            <template v-if="posts">
-                                <CreatePost />
-                                <PostList :posts="posts.data" class="flex-1" />
-                            </template>
-                            <div v-else class="py-8 text-center">
-                                You don't have persmission to view these posts
-                            </div>
+                        <TabPanel class="rounded-xl bg-white p-3 shadow">
+                            Posts
                         </TabPanel>
-                        <TabPanel class="p-3">
-                            <div class="mb-3">
-                                <TextInput
-                                    :model-value="searchFollowersKeyword"
-                                    placeholder="Cari apa saja"
-                                    class="w-full"
-                                />
-                            </div>
-                            <div
-                                v-if="followers.length"
-                                class="grid grid-cols-2 gap-2"
-                            >
-                                <UserListItem
-                                    v-for="user of followers"
-                                    :user="user"
-                                    :key="user.id"
-                                    class="shadow rounded-md"
-                                />
-                            </div>
-                            <div v-else class="text-gray-400 text-center p-3">
-                                Sok seleb ini akun
-                            </div>
+                        <TabPanel class="rounded-xl bg-white p-3 shadow">
+                            Followers
                         </TabPanel>
-                        <TabPanel class="p-3">
-                            <div class="mb-3">
-                                <TextInput
-                                    :model-value="searchFollowingsKeyword"
-                                    placeholder="Cari apa saja"
-                                    class="w-full"
-                                />
-                            </div>
-                            <div
-                                v-if="followings.length"
-                                class="grid grid-cols-2 gap-2"
-                            >
-                                <UserListItem
-                                    v-for="user of followings"
-                                    :user="user"
-                                    :key="user.id"
-                                    class="shadow rounded-md"
-                                />
-                            </div>
-                            <div v-else class="text-gray-400 text-center p-3">
-                                Sok seleb ini akun
-                            </div>
+                        <TabPanel class="rounded-xl bg-white p-3 shadow">
+                            Followings
                         </TabPanel>
                         <TabPanel class="rounded-xl bg-white p-3 shadow">
                             Photos
@@ -350,7 +292,7 @@ function followUser() {
                             />
                         </TabPanel>
                     </TabPanels>
-                </TabGroup>
+                </TabGroup> -->
             </div>
         </div>
     </AuthenticatedLayout>
