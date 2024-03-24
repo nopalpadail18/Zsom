@@ -360,11 +360,7 @@ function updateGroup() {
                         <Tab v-slot="{ selected }" as="template">
                             <TabItem :selected="selected" text="Photos" />
                         </Tab>
-                        <Tab
-                            v-if="isCurrentUserAdmin"
-                            v-slot="{ selected }"
-                            as="template"
-                        >
+                        <Tab v-slot="{ selected }" as="template">
                             <TabItem :selected="selected" text="About" />
                         </Tab>
                     </TabList>
@@ -425,10 +421,13 @@ function updateGroup() {
                             Photos
                         </TabPanel>
                         <TabPanel class="rounded-xl bg-white p-3 shadow">
-                            <GroupForm :form="aboutForm" />
-                            <PrimaryButtonVue @click="updateGroup"
-                                >Submit</PrimaryButtonVue
-                            >
+                            <template v-if="isCurrentUserAdmin">
+                                <GroupForm :form="aboutForm" />
+                                <PrimaryButtonVue @click="updateGroup">
+                                    Submit
+                                </PrimaryButtonVue>
+                            </template>
+                            <div v-else v-html="group.about"></div>
                         </TabPanel>
                     </TabPanels>
                 </TabGroup>

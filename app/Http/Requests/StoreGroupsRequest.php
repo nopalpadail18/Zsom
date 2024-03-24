@@ -27,4 +27,11 @@ class StoreGroupsRequest extends FormRequest
             'about' => ['nullable', 'max:255'],
         ];
     }
+
+    public function prepareForValidation(): void
+    {
+        $this->merge([
+            'about' => nl2br($this->about),
+        ]);
+    }
 }

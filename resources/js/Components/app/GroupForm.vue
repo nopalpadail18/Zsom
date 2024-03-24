@@ -1,6 +1,5 @@
 <script setup>
 import TextInput from "@/Components/TextInput.vue";
-import Checkbox from "../Checkbox.vue";
 import InputTextarea from "../InputTextarea.vue";
 import InputLabel from "../InputLabel.vue";
 
