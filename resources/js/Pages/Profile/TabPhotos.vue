@@ -48,6 +48,7 @@ function openPhoto(index) {
             </div>
         </template>
     </div>
+    <div v-if="!photos.length" class="py-8 text-center">No Photos</div>
 
     <AttachmentPreviewModal
         :attachments="photos || []"

@@ -3,12 +3,17 @@ import { ref } from "vue";
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 import Dropdown from "@/Components/Dropdown.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
-import NavLink from "@/Components/NavLink.vue";
+import TextInput from "@/Components/TextInput.vue";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
-import { Link } from "@inertiajs/vue3";
+import { Link, router } from "@inertiajs/vue3";
 import { usePage } from "@inertiajs/vue3";
 const authUser = usePage().props.auth.user;
 const showingNavigationDropdown = ref(false);
+const keyword = ref(usePage().props.search);
+
+function search() {
+    router.get(route("search", keyword.value));
+}
 </script>
 
 <template>
@@ -20,7 +25,7 @@ const showingNavigationDropdown = ref(false);
         >
             <!-- Primary Navigation Menu -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
+                <div class="flex items-center justify-between h-16">
                     <div class="flex">
                         <!-- Logo -->
                         <div class="shrink-0 flex items-center">
@@ -32,6 +37,14 @@ const showingNavigationDropdown = ref(false);
                         </div>
 
                         <!-- Navigation Links -->
+                    </div>
+                    <div class="hidden sm:flex sm:items-center sm:ms-6">
+                        <TextInput
+                            v-model="keyword"
+                            placeholder="Search"
+                            class="w-full"
+                            @keyup.enter="search"
+                        />
                     </div>
 
                     <div class="hidden sm:flex sm:items-center sm:ms-6">
@@ -176,9 +189,7 @@ const showingNavigationDropdown = ref(false);
                         </div>
                     </template>
                     <template>
-                        <button>
-                            Login Button
-                        </button>
+                        <button>Login Button</button>
                     </template>
                 </div>
             </div>
