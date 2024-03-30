@@ -1,8 +1,11 @@
 <script setup>
 import {
-    ChatBubbleLeftRightIcon,
-    HandThumbUpIcon,
+    BookmarkIcon,
+    ChatBubbleOvalLeftIcon,
+    HeartIcon,
+    PaperAirplaneIcon,
 } from "@heroicons/vue/24/outline";
+import { HeartIcon as HeartIconSolid } from "@heroicons/vue/24/solid";
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
 import PostUserHeader from "./PostUserHeader.vue";
 import { router } from "@inertiajs/vue3";
@@ -11,6 +14,7 @@ import ReadMoreReadLess from "./ReadMoreReadLess.vue";
 import EditDeleteDropdown from "./EditDeleteDropdown.vue";
 import PostAttachments from "./PostAttachments.vue";
 import CommentList from "./CommentList.vue";
+import { computed } from "vue";
 
 const props = defineProps({
     post: Object,
@@ -45,6 +49,26 @@ function sendReaction() {
             props.post.num_of_reactions = data.num_of_reactions;
         });
 }
+
+const likeIcon = computed(() => {
+    if (props.post.curent_user_has_reactions) {
+        return HeartIconSolid;
+    } else {
+        return HeartIcon;
+    }
+});
+
+function copyToClipboard() {
+    const textCopy = route("post.view", props.post.id);
+    const tempInput = document.createElement("input");
+    tempInput.value = textCopy;
+    document.body.appendChild(tempInput);
+
+    tempInput.select();
+    document.execCommand("copy");
+
+    document.body.removeChild(tempInput);
+}
 </script>
 <template>
     <div class="bg-white border rounded p-4 shadow mb-3">
@@ -57,9 +81,7 @@ function sendReaction() {
                 @delete="deletePost"
             />
         </div>
-        <div class="mb-3">
-            <ReadMoreReadLess :content="post.body" />
-        </div>
+
         <div
             class="grid gap-3 mb-3"
             :class="[
@@ -72,30 +94,47 @@ function sendReaction() {
             />
         </div>
         <Disclosure v-slot="{ open }">
-            <div class="flex gap-2">
-                <button
-                    @click="sendReaction"
-                    class="text-gray-800 flex gap-1 flex-center justify-center bg-gray-100 rounded-lg hover:bg-gray-200 py-2 px-4 flex-1"
-                    :class="[
-                        post.curent_user_has_reactions
-                            ? 'bg-sky-100 hover:bg-sky-200'
-                            : 'bg-gray-100 hover:bg-gray-200',
-                    ]"
-                >
-                    <HandThumbUpIcon class="w-5 h-5" />
-                    <span class="mr-2">{{ post.num_of_reactions }}</span>
-                    {{ post.curent_user_has_reactions ? "Liked" : "Like" }}
+            <div class="flex items-center justify-between">
+                <div class="grid grid-cols-2 items-center">
+                    <button
+                        @click="sendReaction"
+                        class="text-gray-800"
+                        :class="
+                            post.curent_user_has_reactions ? 'text-red-500' : ''
+                        "
+                    >
+                        <transition
+                            name="like-btn-animation"
+                            mode="out-in"
+                            enter-active-class="transition ease-in duration-200 scale-70"
+                            enter-to-class="scale-100"
+                            leave-active-class="transition ease-out duration-150 scale-50"
+                        >
+                            <component :is="likeIcon" class="w-7 h-7" />
+                        </transition>
+                    </button>
+                    <DisclosureButton class="text-gray-800">
+                        <ChatBubbleOvalLeftIcon
+                            class="w-7 h-7 mr-2 transform scale-x-[-1]"
+                        />
+                    </DisclosureButton>
+                </div>
+                <button @click="copyToClipboard">
+                    <PaperAirplaneIcon
+                        class="w-7 h-7 text-gray-800 -rotate-45"
+                    />
                 </button>
-                <DisclosureButton
-                    class="text-gray-800 flex gap-1 flex-center justify-center bg-gray-100 rounded-lg hover:bg-gray-200 py-2 px-4 flex-1"
-                >
-                    <ChatBubbleLeftRightIcon class="w-5 h-5 mr-2" />
-                    <span class="mr-2">
-                        {{ post.num_of_comments }}
-                    </span>
-                    Comment
+            </div>
+            <div class="mb-3">
+                <span class="mr-2 text-sm font-semibold">
+                    {{ post.num_of_reactions }} Likes
+                </span>
+                <ReadMoreReadLess :content="post.body" />
+                <DisclosureButton class="mr-2 text-sm text-gray-400">
+                    View all {{ post.num_of_comments }} Comment
                 </DisclosureButton>
             </div>
+
             <DisclosurePanel
                 class="comment-list mt-3 max-h-[400px] lg:flex-1 overflow-auto"
             >

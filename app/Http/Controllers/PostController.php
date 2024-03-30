@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use OpenAI\Laravel\Facades\OpenAI;
 
 class PostController extends Controller
 {
@@ -80,7 +81,7 @@ class PostController extends Controller
 
             if ($group) {
                 $users = $group->approvedUsers()->where('users.id', '!=', $user->id)->get();
-                Notification::send($users, new PostCreated($post, $group));
+                Notification::send($users, new PostCreated($post, $user, $group));
             }
 
             $followers = $user->followers;
@@ -302,5 +303,23 @@ class PostController extends Controller
             'num_of_reactions' => $reactions,
             'curent_user_has_reactions' => $hasReaction,
         ]);
+    }
+
+    public function generatePostContent(Request $request)
+    {
+        $prompt = $request->get('prompt');
+
+        $result = OpenAI::chat()->create([
+            'model' => 'gpt-3.5-turbo',
+            'messages' => [
+                [
+                    'role' => 'user',
+                    'content' => "Please generate a post content sosial media based on the following propmpt. Generate formated content with multiple paragraphs. Put hastags after 2 lines from the main content:"
+                        . PHP_EOL . PHP_EOL . $prompt,
+                ],
+            ],
+        ]);
+
+        return response(['content' => $result->choices[0]->message->content]);
     }
 }

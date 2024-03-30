@@ -9,22 +9,24 @@ defineProps({
 <template>
     <Disclosure v-slot="{ open }">
         <div
-            class="ck-content-output"
+            class="ck-content-output text-sm"
             v-if="!open"
-            v-html="content.substring(0, 200)"
+            v-html="
+                content.substring(0, 35) + (content.length > 35 ? '...' : '')
+            "
             :class="contentClass"
         />
-        <template v-if="content && content.length > 200">
+        <template v-if="content && content.length > 35">
             <DisclosurePanel>
                 <div
-                    class="ck-content-output"
+                    class="ck-content-output text-sm"
                     :class="contentClass"
                     v-html="content"
                 />
             </DisclosurePanel>
-            <div class="flex justify-end">
-                <DisclosureButton class="text-blue-500 hover:underline">
-                    {{ open ? "Show less" : "Show more" }}
+            <div class="flex justify-start">
+                <DisclosureButton class="text-gray-400 text-sm">
+                    {{ open ? "less" : "more" }}
                 </DisclosureButton>
             </div>
         </template>

@@ -64,7 +64,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/group/change-role/{group:slug}', [GroupController::class, 'changeRole'])
         ->name('group.changeRole');
 
-
+    //posts
     Route::post('/post', [PostController::class, 'store'])->name('posts.create');
     Route::get('/post/{post}/view', [PostController::class, 'view'])->name('post.view');
     Route::put('/post/{post}', [PostController::class, 'update'])->name('posts.update');
@@ -75,6 +75,9 @@ Route::middleware('auth')->group(function () {
         ->name('post.reaction');
     Route::post('/post/{post}/comment', [PostController::class, 'createComment'])
         ->name('post.comment.create');
+    Route::post('/ai-post', [PostController::class, 'generatePostContent'])
+        ->name('post.aiContent');
+    //commnet
     Route::delete('/comment/{comment}', [PostController::class, 'deleteComment'])
         ->name('comment.delete');
     Route::put('/comment/{comment}', [PostController::class, 'updateComment'])

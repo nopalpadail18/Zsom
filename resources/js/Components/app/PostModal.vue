@@ -5,6 +5,7 @@ import {
     PaperClipIcon,
     BookmarkIcon,
     ArrowUturnLeftIcon,
+    SparklesIcon,
 } from "@heroicons/vue/24/solid";
 import {
     TransitionRoot,
@@ -18,6 +19,8 @@ import { useForm, usePage } from "@inertiajs/vue3";
 import { watch } from "vue";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { isImage } from "@/helpers";
+import axiosClient from "@/axiosClient";
+// import AiButton from "@/plugins/ai-button";
 
 const editor = ClassicEditor;
 const editorConfig = {
@@ -190,6 +193,36 @@ function undoDeleted(myFile) {
         (id) => id !== myFile.id
     );
 }
+
+function getAiContent() {
+    if (!form.body) {
+        return;
+    }
+    axiosClient
+        .post(route("post.aiContent", props.post.id), {
+            prompt: form.body,
+        })
+        .then(({ data }) => {
+            form.body = data.content;
+        })
+        .catch((err) => {
+            if (err.response.status === 500) {
+                const text =
+                    "Miskin developernya, da nda bisa beli apinya cet gipiti. kalo mau blikan mi dia🤣🤣🤣";
+                form.body = "";
+                let i = 0;
+                const id = setInterval(() => {
+                    form.body += text[i];
+                    i++;
+                    if (i >= text.length) {
+                        clearInterval(id);
+                    }
+                }, 70);
+            } else {
+                form.body = "Something went wrong.";
+            }
+        });
+}
 </script>
 
 <template>
@@ -252,11 +285,20 @@ function undoDeleted(myFile) {
                                         {{ formErrors.group_id }}
                                     </div>
 
-                                    <ckeditor
-                                        :editor="editor"
-                                        v-model="form.body"
-                                        :config="editorConfig"
-                                    ></ckeditor>
+                                    <div class="relative group">
+                                        <ckeditor
+                                            id="editorku"
+                                            :editor="editor"
+                                            v-model="form.body"
+                                            :config="editorConfig"
+                                        />
+                                        <button
+                                            @click="getAiContent"
+                                            class="absolute top-11 right-1 w-8 h-8 rounded bg-indigo-500 hover:bg-indigo-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
+                                        >
+                                            <SparklesIcon class="w-6 h-6" />
+                                        </button>
+                                    </div>
 
                                     <div
                                         v-if="showExtentionText"

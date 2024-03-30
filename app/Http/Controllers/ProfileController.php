@@ -11,8 +11,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Redirect;
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Http\Resources\PostAttachmentResource;
 use App\Http\Resources\PostResource;
 use App\Models\Followers;
+use App\Models\PostAttachments;
 use App\Models\Posts;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Storage;
@@ -34,6 +36,11 @@ class ProfileController extends Controller
 
         $followers = $user->followers;
         $following = $user->followings;
+        $photos = PostAttachments::query()
+            ->where('mime', 'LIKE', 'image/%')
+            ->where('created_by', $user->id)
+            ->latest()
+            ->get();
 
         $posts = Posts::postForTimeLine(Auth::id())
             ->where('user_id', $user->id)
@@ -53,6 +60,7 @@ class ProfileController extends Controller
             'posts' => $posts,
             'followers' => UserResource::collection($followers),
             'followings' => UserResource::collection($following),
+            'photos' => PostAttachmentResource::collection($photos)
         ]);
     }
 
