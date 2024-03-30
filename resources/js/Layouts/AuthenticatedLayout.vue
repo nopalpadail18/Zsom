@@ -9,10 +9,10 @@ import { Link, router } from "@inertiajs/vue3";
 import { usePage } from "@inertiajs/vue3";
 const authUser = usePage().props.auth.user;
 const showingNavigationDropdown = ref(false);
-const keyword = ref(usePage().props.search);
+const keyword = ref(usePage().props.search || "");
 
 function search() {
-    router.get(route("search", keyword.value));
+    router.get(route("search", encodeURIComponent(keyword.value)));
 }
 </script>
 

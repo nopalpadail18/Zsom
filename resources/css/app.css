@@ -44,6 +44,9 @@
     text-decoration: underline;
     color: #0052cc;
 }
+.ck-content-output a.hastag {
+    background-color: #e6d5fb;
+}
 
 .ck-content-output > blockquote,
 .ck-content-output > dl,

@@ -22,6 +22,13 @@ const props = defineProps({
 
 const emit = defineEmits(["editClick", "attachmentClick"]);
 
+const postBody = computed(() =>
+    props.post.body.replace(/(#\w+)(?<!<\/a>)/g, (match, group) => {
+        const encodeGroup = encodeURIComponent(group);
+        return `<a href="/search/${encodeGroup}" class="hastag">${group}</a>`;
+    })
+);
+
 function openEditModal() {
     emit("editClick", props.post);
 }
@@ -129,7 +136,7 @@ function copyToClipboard() {
                 <span class="mr-2 text-sm font-semibold">
                     {{ post.num_of_reactions }} Likes
                 </span>
-                <ReadMoreReadLess :content="post.body" />
+                <ReadMoreReadLess :content="postBody" />
                 <DisclosureButton class="mr-2 text-sm text-gray-400">
                     View all {{ post.num_of_comments }} Comment
                 </DisclosureButton>

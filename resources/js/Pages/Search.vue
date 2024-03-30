@@ -13,7 +13,10 @@ const props = defineProps({
 <template>
     <AuthenticatedLayout>
         <div class="p-3">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div
+                v-if="!search.startsWith('#')"
+                class="grid grid-cols-1 sm:grid-cols-2 gap-3"
+            >
                 <div class="mb-4 bg-white shadow rounded p-4">
                     <h2 class="text-lg font-bold">Users</h2>
                     <div class="grid-cols-2">
