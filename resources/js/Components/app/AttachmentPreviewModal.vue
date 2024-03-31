@@ -7,7 +7,7 @@ import {
     DialogPanel,
     DialogTitle,
 } from "@headlessui/vue";
-import { isImage } from "@/helpers";
+import { isImage, isVideo } from "@/helpers";
 import {
     ChevronLeftIcon,
     ChevronRightIcon,
@@ -114,24 +114,25 @@ const touchEndX = ref(0);
                             >
                                 <button
                                     @click="closeModal"
-                                    class="absolute right-3 top-3 z-30 w-10 h-10 rounded-full hover:bg-black/10 transition flex item-center justify-center"
+                                    class="absolute right-3 top-3 z-40 w-10 h-10 rounded-full hover:bg-black/10 transition flex item-center justify-center"
                                 >
                                     <XMarkIcon class="w-6 h-6" />
                                 </button>
-                                <div class="relative group h-full"
+                                <div
+                                    class="relative group h-full"
                                     @touchstart="onTouchStart"
                                     @touchmove="onTouchMove"
                                     @touchend="onTouchEnd"
                                 >
                                     <div
                                         @click="prev()"
-                                        class="absolute opacity-0 group-hover:opacity-100 text-gray-300 cursor-pointer flex items-center w-12 h-full left-0 bg-black/5"
+                                        class="absolute opacity-0 group-hover:opacity-100 text-gray-300 cursor-pointer flex items-center w-12 h-full left-0 bg-black/5 z-30"
                                     >
                                         <ChevronLeftIcon class="w-12" />
                                     </div>
                                     <div
                                         @click="next()"
-                                        class="absolute opacity-0 group-hover:opacity-100 text-gray-300 cursor-pointer flex items-center w-12 h-full right-0 bg-black/5"
+                                        class="absolute opacity-0 group-hover:opacity-100 text-gray-300 cursor-pointer flex items-center w-12 h-full right-0 bg-black/5 z-30"
                                     >
                                         <ChevronRightIcon class="w-12" />
                                     </div>
@@ -143,6 +144,16 @@ const touchEndX = ref(0);
                                             :src="attachment.url"
                                             class="max-h-full max-w-full"
                                         />
+                                        <div
+                                            v-else-if="isVideo(attachment)"
+                                            class="flex items-center"
+                                        >
+                                            <video
+                                                :src="attachment.url"
+                                                controls
+                                                autoplay
+                                            />
+                                        </div>
                                         <div
                                             v-else
                                             class="flex felx-col justify-center items-center p-32"

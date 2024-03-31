@@ -1,2 +1,25 @@
 User-agent: *
-Disallow:
+Disallow: /admin
+Disallow: /private
+Disallow: /secrets
+Disallow: /protected-route
+Disallow: /*.php
+Disallow: /*.html
+Disallow: /*.htm
+Disallow: /*.xml
+Disallow: /*.json
+Disallow: /*.txt
+Disallow: /*.css
+Disallow: /*.js
+Disallow: /*.png
+Disallow: /*.jpg
+Disallow: /*.jpeg
+Disallow: /*.gif
+Disallow: /*.ico
+Disallow: /*.svg
+Disallow: /*.woff
+Disallow: /*.ttf
+
+Allow: /$
+Allow: /public
+Allow: /assets

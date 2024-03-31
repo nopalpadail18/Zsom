@@ -1,7 +1,7 @@
 <script setup>
 import { ArrowDownTrayIcon } from "@heroicons/vue/24/outline";
 import { PaperClipIcon } from "@heroicons/vue/24/solid";
-import { isImage } from "@/helpers";
+import { isImage, isVideo } from "@/helpers";
 import { ref } from "vue";
 import AttachmentPreviewModal from "@/Components/app/AttachmentPreviewModal.vue";
 
@@ -41,6 +41,9 @@ function openPhoto(index) {
                     alt=""
                     class="object-contain aspect-square"
                 />
+                <div v-else-if="isVideo(attachment)" class="flex items-center">
+                    <video :src="attachment.url" controls></video>
+                </div>
                 <div v-else class="flex flex-col justify-center items-center">
                     <PaperClipIcon class="w-10 h-10 mb-3" />
                     <small>{{ attachment.name }}</small>
