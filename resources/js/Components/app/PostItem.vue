@@ -15,6 +15,7 @@ import EditDeleteDropdown from "./EditDeleteDropdown.vue";
 import PostAttachments from "./PostAttachments.vue";
 import CommentList from "./CommentList.vue";
 import { computed } from "vue";
+import UrlPreview from "./UrlPreview.vue";
 
 const props = defineProps({
     post: Object,
@@ -22,12 +23,18 @@ const props = defineProps({
 
 const emit = defineEmits(["editClick", "attachmentClick"]);
 
-const postBody = computed(() =>
-    props.post.body.replace(/(#\w+)(?<!<\/a>)/g, (match, group) => {
-        const encodeGroup = encodeURIComponent(group);
-        return `<a href="/search/${encodeGroup}" class="hastag">${group}</a>`;
-    })
-);
+const postBody = computed(() => {
+    let content = props.post.body.replace(
+        /(?:(\s+)|<p>)((#\w+)(?![^<]*<\/a>))/g,
+        (match, group1, group2) => {
+            const encodeGroup = encodeURIComponent(group2);
+            return `${group1 || ""}
+            <a href="/search/${encodeGroup}" class="hastag">${group2}</a>`;
+        }
+    );
+
+    return content;
+});
 
 function openEditModal() {
     emit("editClick", props.post);
@@ -135,6 +142,7 @@ function copyToClipboard() {
                     {{ post.num_of_reactions }} Likes
                 </span>
                 <ReadMoreReadLess :content="postBody" />
+                <UrlPreview :preview="post.preview" :url="post.preview_url" />
                 <DisclosureButton class="mr-2 text-sm text-gray-400">
                     View all {{ post.num_of_comments }} Comment
                 </DisclosureButton>

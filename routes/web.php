@@ -78,6 +78,8 @@ Route::middleware('auth')->group(function () {
         ->name('post.comment.create');
     Route::post('/ai-post', [PostController::class, 'generatePostContent'])
         ->name('post.aiContent');
+    Route::post('/fetch-url-preview', [PostController::class, 'fetchUrlPreview'])
+        ->name('post.fetchUrlPreview');
     //commnet
     Route::delete('/comment/{comment}', [PostController::class, 'deleteComment'])
         ->name('comment.delete');

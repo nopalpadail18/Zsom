@@ -20,10 +20,25 @@ import { watch } from "vue";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { isImage } from "@/helpers";
 import axiosClient from "@/axiosClient";
+import UrlPreview from "./UrlPreview.vue";
 // import AiButton from "@/plugins/ai-button";
 
 const editor = ClassicEditor;
 const editorConfig = {
+    mediaEmbed: {
+        removeProviders: [
+            "instagram",
+            "twitter",
+            "youtube",
+            "tiktok",
+            "facebook",
+            "soundcloud",
+            "vimeo",
+            "dailymotion",
+            "spotify",
+            "googleMaps",
+        ],
+    },
     toolbar: [
         "bold",
         "italic",
@@ -54,6 +69,8 @@ const form = useForm({
     attachments: [],
     group_id: null,
     deleted_file_ids: [],
+    preview: {},
+    preview_url: null,
     _method: "POST",
 });
 
@@ -72,6 +89,7 @@ watch(
     () => props.post,
     () => {
         form.body = props.post.body || "";
+        onInputChange();
     }
 );
 
@@ -223,6 +241,61 @@ function getAiContent() {
             }
         });
 }
+
+function fetchPreview(url) {
+    if (url === form.preview_url) {
+        return;
+    }
+
+    form.preview_url = url;
+    form.preview = {};
+    if (url) {
+        axiosClient
+            .post(route("post.fetchUrlPreview"), { url })
+            .then(({ data }) => {
+                form.preview = {
+                    title: data["og:title"],
+                    description: data["og:description"],
+                    image: data["og:image"],
+                };
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
+}
+
+function onInputChange() {
+    let url = matchHref();
+
+    if (!url) {
+        url = matchLink();
+    }
+    fetchPreview(url);
+}
+
+function matchHref() {
+    const urlRegex = /<a.+href="((https?):\/\/[^"]+)"/;
+
+    const match = form.body.match(urlRegex);
+
+    if (match && match.length > 0) {
+        return match[1];
+    }
+
+    return null;
+}
+function matchLink() {
+    const urlRegex = /(?:https?):\/\/[^\s<]+/;
+
+    const match = form.body.match(urlRegex);
+
+    if (match && match.length > 0) {
+        return match[0];
+    }
+
+    return null;
+}
 </script>
 
 <template>
@@ -291,6 +364,11 @@ function getAiContent() {
                                             :editor="editor"
                                             v-model="form.body"
                                             :config="editorConfig"
+                                            @input="onInputChange"
+                                        />
+                                        <UrlPreview
+                                            :preview="form.preview"
+                                            :url="form.preview_url"
                                         />
                                         <button
                                             @click="getAiContent"

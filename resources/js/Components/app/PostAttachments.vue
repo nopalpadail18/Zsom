@@ -15,7 +15,7 @@ const props = defineProps({
 defineEmits(["attachmentClick"]);
 
 let currentVideo = null;
-const isMuted = ref(false);
+const isMuted = ref(true);
 const isAudioIcon = computed(() =>
     isMuted.value ? SpeakerXMarkIcon : SpeakerWaveIcon
 );
@@ -56,6 +56,12 @@ function initializeIntersectionObserver(video) {
 }
 
 // Fungsi untuk memutar dan menghentikan pemutaran video
+window.addEventListener("blur", function () {
+    if (currentVideo) {
+        pauseVideo(currentVideo);
+    }
+});
+
 function playAndStopOnClick(video) {
     if (video.paused) {
         playVideo(video);
@@ -122,6 +128,8 @@ function toggleAud(video) {
                     :ref="`videoPlayer${ind}`"
                     :src="attachment.url"
                     class="w-full h-full"
+                    autoplay
+                    muted
                     loop
                     @loadedmetadata="
                         initializeIntersectionObserver($event.target)
