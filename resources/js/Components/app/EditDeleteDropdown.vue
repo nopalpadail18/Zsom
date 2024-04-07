@@ -22,6 +22,7 @@ const props = defineProps({
 });
 
 const authUser = usePage().props.auth.user;
+const group = usePage().props.group;
 
 // Membuat properti terkomputasi `user`, yang bergantung pada props.comment dan props.post.
 // Jika props.comment tidak ada, maka user akan menjadi props.post.user.
@@ -31,6 +32,19 @@ const user = computed(() => props.comment?.user || props.post?.user);
 // Membuat properti terkomputasi `editAllowed`, yang bergantung pada nilai `user` dan `authUser`.
 // Jika `user` memiliki id yang sama dengan `authUser.id`, maka editAllowed akan menjadi true.
 const editAllowed = computed(() => user.value.id === authUser.id);
+const pinAllowed = computed(() => {
+    return (
+        user.value.id === authUser.id ||
+        (props.post.group && props.post.group.role === "admin")
+    );
+});
+
+const isPinned = computed(() => {
+    return (
+        user.value.id === authUser.id ||
+        (props.post.group && props.post.group.role === "admin")
+    );
+});
 
 // Membuat properti terkomputasi `deleteAllowed` untuk menentukan apakah pengguna diizinkan untuk menghapus.
 const deleteAllowed = computed(() => {
@@ -44,7 +58,7 @@ const deleteAllowed = computed(() => {
     return !props.comment && props.post.group?.role === "admin";
 });
 
-defineEmits(["edit", "delete"]);
+defineEmits(["edit", "delete", "pin"]);
 
 function copyToClipboard() {
     const textCopy = route("post.view", props.post.id);
@@ -64,7 +78,7 @@ function copyToClipboard() {
             <MenuButton
                 class="w-8 h-8 z-10 rounded-full hover:bg-black/5 transition flex item-center justify-center"
             >
-                <EllipsisVerticalIcon class="w-5 h-5" aria-hidden="true" />
+                <EllipsisVerticalIcon class="w-5 h-5 mt-1" aria-hidden="true" />
             </MenuButton>
         </div>
 
@@ -126,6 +140,30 @@ function copyToClipboard() {
                                 aria-hidden="true"
                             />
                             Edit
+                        </button>
+                    </MenuItem>
+                    <MenuItem v-if="pinAllowed" v-slot="{ active }">
+                        <button
+                            @click="$emit('pin')"
+                            :class="[
+                                active
+                                    ? 'bg-indigo-500 text-white'
+                                    : 'text-gray-900',
+                                'group flex w-full items-center rounded-md px-2 py-2 text-sm',
+                            ]"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 66 65"
+                                version="1.1"
+                                class="w-7 h-7 rotate-45 -m-1 mr-1"
+                            >
+                                <path
+                                    d="M39.4418525,19.945683 L41.5368613,33.9124087 C44.8731757,34.6460584 47,35.7567964 47,37 C47,39.209139 40.2842712,41 32,41 C23.7157288,41 17,39.209139 17,37 C17,35.7567964 19.1268243,34.6460584 22.4631387,33.9124087 L24.5581475,19.945683 C22.3708176,19.2145917 21,18.1655089 21,17 C21,14.790861 25.9248678,13 32,13 C38.0751322,13 43,14.790861 43,17 C43,18.1655089 41.6291824,19.2145917 39.4418525,19.945683 Z M31,51.9993209 L31,42.0006851 L34,42.0006851 L34,51.9993209 L32.5,53.9993209 L31,51.9993209 Z"
+                                />
+                            </svg>
+
+                            {{ isPinned ? "Unpin" : "Pin" }}
                         </button>
                     </MenuItem>
                     <MenuItem v-if="deleteAllowed" v-slot="{ active }">

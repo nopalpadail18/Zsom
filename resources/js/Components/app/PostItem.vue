@@ -8,7 +8,7 @@ import {
 import { HeartIcon as HeartIconSolid } from "@heroicons/vue/24/solid";
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
 import PostUserHeader from "./PostUserHeader.vue";
-import { router } from "@inertiajs/vue3";
+import { router, useForm, usePage } from "@inertiajs/vue3";
 import axiosClient from "@/axiosClient";
 import ReadMoreReadLess from "./ReadMoreReadLess.vue";
 import EditDeleteDropdown from "./EditDeleteDropdown.vue";
@@ -20,6 +20,9 @@ import UrlPreview from "./UrlPreview.vue";
 const props = defineProps({
     post: Object,
 });
+
+const group = usePage().props.group;
+const authUser = usePage().props.auth.user;
 
 const emit = defineEmits(["editClick", "attachmentClick"]);
 
@@ -36,6 +39,14 @@ const postBody = computed(() => {
     return content;
 });
 
+const isPinned = computed(() => {
+    if (group?.id) {
+        return group?.pinned_post_id === props.post.id;
+    }
+
+    return authUser?.pinned_post_id === props.post.id;
+});
+
 function openEditModal() {
     emit("editClick", props.post);
 }
@@ -46,6 +57,30 @@ function deletePost() {
             preserveScroll: true,
         });
     }
+}
+
+function pinUnpinPost() {
+    const form = useForm({
+        forGroup: group?.id,
+    });
+    const isPinned = false;
+
+    if (group?.id) {
+        isPinned = group?.pinned_post_id === props.post.id;
+    } else {
+        isPinned = authUser?.pinned_post_id === props.post.id;
+    }
+
+    form.post(route("post.pinUnpin", props.post.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            if (group?.id) {
+                group.pinned_post_id = isPinned ? null : props.post.id;
+            } else {
+                authUser.pinned_post_id = isPinned ? null : props.post.id;
+            }
+        },
+    });
 }
 
 function openAttachment(ind) {
@@ -88,12 +123,16 @@ function copyToClipboard() {
     <div class="bg-white border rounded p-4 shadow mb-3">
         <div class="flex items-center justify-between mb-3">
             <PostUserHeader :post="post" />
-            <EditDeleteDropdown
-                :user="post.user"
-                :post="post"
-                @edit="openEditModal"
-                @delete="deletePost"
-            />
+            <div class="flex items-center">
+                {{ isPinned ? "Pinned" : "" }}
+                <EditDeleteDropdown
+                    :user="post.user"
+                    :post="post"
+                    @edit="openEditModal"
+                    @delete="deletePost"
+                    @pin="pinUnpinPost"
+                />
+            </div>
         </div>
 
         <div

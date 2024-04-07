@@ -13,6 +13,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
+/**
+ * Class Posts
+ *
+ * @property Groups $group
+ * @package App\Models
+ *
+ */
 class Posts extends Model
 {
     use HasFactory;
@@ -52,9 +59,9 @@ class Posts extends Model
         return $this->hasMany(Comments::class, 'post_id', 'id');
     }
 
-    public static function postForTimeLine($userId): Builder
+    public static function postForTimeLine($userId, $getLatest = true): Builder
     {
-        return   Posts::query()
+        $query = Posts::query()
             ->withCount('reactions')
             ->with([
                 'comments' => function ($q) {
@@ -63,7 +70,12 @@ class Posts extends Model
                 'reactions' => function ($q) use ($userId) {
                     $q->where('user_id', $userId);
                 }
-            ])->latest();
+            ]);
+        if ($getLatest) {
+            $query->latest();
+        }
+
+        return $query;
     }
 
     public function isOwner($userId)

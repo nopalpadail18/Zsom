@@ -354,4 +354,41 @@ class PostController extends Controller
 
         return $ogTags;
     }
+
+    public function pinUnpin(Request $request, Posts $post)
+    {
+        $forGroup = $request->get('forGroup', false);
+        $group = $post->group;
+
+        if ($forGroup && !$group) {
+            return response('Invalid request', 400);
+        }
+        if ($forGroup && !$group->isAdmin(Auth::id())) {
+            return response('You are not allowed to do this action', 403);
+        }
+
+        $pinned = false;
+        if ($forGroup && $group->isAdmin(Auth::id())) {
+            if ($group->pinned_post_id == $post->id) {
+                $group->pinned_post_id = null;
+            } else {
+                $pinned = true;
+                $group->pinned_post_id = $post->id;
+            }
+            $group->save();
+        }
+
+        if (!$forGroup) {
+            $user = $request->user();
+            if ($user->pinned_post_id == $post->id) {
+                $user->pinned_post_id = null;
+            } else {
+                $pinned = true;
+                $user->pinned_post_id = $post->id;
+            }
+            $user->save();
+        }
+
+        return back()->with('success', 'Post was ' . ($pinned ? 'pinned' : 'unpinned'));
+    }
 }

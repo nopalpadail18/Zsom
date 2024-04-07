@@ -80,6 +80,8 @@ Route::middleware('auth')->group(function () {
         ->name('post.aiContent');
     Route::post('/fetch-url-preview', [PostController::class, 'fetchUrlPreview'])
         ->name('post.fetchUrlPreview');
+    Route::post('/post/{post}/pin', [PostController::class, 'pinUnpin'])
+        ->name('post.pinUnpin');
     //commnet
     Route::delete('/comment/{comment}', [PostController::class, 'deleteComment'])
         ->name('comment.delete');

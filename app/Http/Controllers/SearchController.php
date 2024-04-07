@@ -9,6 +9,7 @@ use App\Models\Groups;
 use App\Models\Posts;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class SearchController extends Controller
 {
@@ -28,9 +29,8 @@ class SearchController extends Controller
             ->orWhere('about', 'LIKE', "%$search%")
             ->latest()
             ->get();
-        $posts = Posts::query()
+        $posts = Posts::postForTimeLine(Auth::id())
             ->where('body', 'LIKE', "%$search%")
-            ->latest()
             ->paginate(10);
 
         $posts = PostResource::collection($posts);
