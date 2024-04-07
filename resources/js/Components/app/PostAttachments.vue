@@ -62,6 +62,20 @@ window.addEventListener("blur", function () {
     }
 });
 
+window.addEventListener("focus", function () {
+    if (currentVideo) {
+        const video = currentVideo;
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    playVideo(video);
+                }
+            });
+        });
+        observer.observe(video);
+    }
+});
+
 function playAndStopOnClick(video) {
     if (video.paused) {
         playVideo(video);

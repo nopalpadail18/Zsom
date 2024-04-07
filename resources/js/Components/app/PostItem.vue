@@ -63,7 +63,7 @@ function pinUnpinPost() {
     const form = useForm({
         forGroup: group?.id,
     });
-    const isPinned = false;
+    let isPinned = false;
 
     if (group?.id) {
         isPinned = group?.pinned_post_id === props.post.id;

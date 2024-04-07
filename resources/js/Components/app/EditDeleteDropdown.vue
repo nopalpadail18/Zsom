@@ -40,10 +40,11 @@ const pinAllowed = computed(() => {
 });
 
 const isPinned = computed(() => {
-    return (
-        user.value.id === authUser.id ||
-        (props.post.group && props.post.group.role === "admin")
-    );
+    if (group?.id) {
+        return group?.pinned_post_id === props.post.id;
+    }
+
+    return authUser?.pinned_post_id === props.post.id;
 });
 
 // Membuat properti terkomputasi `deleteAllowed` untuk menentukan apakah pengguna diizinkan untuk menghapus.
