@@ -16,6 +16,7 @@ import PostAttachments from "./PostAttachments.vue";
 import CommentList from "./CommentList.vue";
 import { computed } from "vue";
 import UrlPreview from "./UrlPreview.vue";
+import Pinned from "./Icons/Pinned.vue";
 
 const props = defineProps({
     post: Object,
@@ -124,7 +125,10 @@ function copyToClipboard() {
         <div class="flex items-center justify-between mb-3">
             <PostUserHeader :post="post" />
             <div class="flex items-center">
-                {{ isPinned ? "Pinned" : "" }}
+                <div v-if="isPinned" class="flex items-center mr-4">
+                    <Pinned :className="'w-5 h-5 -mr-0'" />
+                    <span class="text-xs">Pinned</span>
+                </div>
                 <EditDeleteDropdown
                     :user="post.user"
                     :post="post"
@@ -177,10 +181,15 @@ function copyToClipboard() {
                 </button>
             </div>
             <div class="mb-3">
-                <span class="mr-2 text-sm font-semibold">
-                    {{ post.num_of_reactions }} Likes
-                </span>
-                <ReadMoreReadLess :content="postBody" />
+                <div class="w-full">
+                    <span class="mr-2 text-sm font-semibold">
+                        {{ post.num_of_reactions }} Likes
+                    </span>
+                </div>
+                <ReadMoreReadLess
+                    :content="postBody"
+                    :uploader="post.user.name"
+                />
                 <UrlPreview :preview="post.preview" :url="post.preview_url" />
                 <DisclosureButton class="mr-2 text-sm text-gray-400">
                     View all {{ post.num_of_comments }} Comment

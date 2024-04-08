@@ -47,6 +47,9 @@
 .ck-content-output a.hastag {
     background-color: #e6d5fb;
 }
+div.ck-content-output > p {
+    margin-top: 1px;
+}
 
 .ck-content-output > blockquote,
 .ck-content-output > dl,
