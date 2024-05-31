@@ -10,7 +10,7 @@ defineProps({
 <template>
     <Disclosure v-slot="{ open }">
         <div v-if="content && !open" class="flex items-center gap-1">
-            <div>
+            <div v-if="open">
                 <Link
                     :href="route('profile', uploader)"
                     class="text-gray-800 font-bold"
@@ -30,7 +30,7 @@ defineProps({
         <template v-if="content && content.length > 35">
             <DisclosurePanel>
                 <div class="flex items-start gap-1">
-                    <div>
+                    <div v-if="open">
                         <Link
                             :href="route('profile', uploader)"
                             class="text-gray-800 font-bold"

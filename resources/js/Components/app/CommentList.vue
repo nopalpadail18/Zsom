@@ -12,6 +12,7 @@ import DangerButton from "../DangerButton.vue";
 import axiosClient from "@/axiosClient";
 import { usePage } from "@inertiajs/vue3";
 import { ref } from "vue";
+import { Link } from "@inertiajs/vue3";
 import ReadMoreReadLess from "./ReadMoreReadLess.vue";
 
 const authUser = usePage().props.auth.user;
@@ -144,21 +145,21 @@ function onCommentDelete(comment) {
             >
                 <div class="flex justify-between gap-2">
                     <div class="flex gap-2">
-                        <a href="javascript:void(0)">
+                        <Link :href="route('profile', comment.user.username)">
                             <img
                                 :src="comment.user.avatar_url"
                                 alt=""
                                 class="w-[40px] h-[40px] object-cover rounded-full border-2 transition-all hover:border-blue-400"
                             />
-                        </a>
+                        </Link>
                         <div>
                             <h4 class="font-bold">
-                                <a
-                                    href="javascript:void(0)"
+                                <Link
+                                    :href="route('profile', comment.user.username)"
                                     class="hover:underline"
                                 >
                                     {{ comment.user.name }}
-                                </a>
+                                </Link>
                             </h4>
                             <small class="text-gray-400 text-xs">
                                 {{ comment.updated_at }}
@@ -200,6 +201,7 @@ function onCommentDelete(comment) {
                     <ReadMoreReadLess
                         v-else
                         :content="comment.comment"
+                        :uploader="comment.user.name"
                         content-class="text-sm flex flex-1"
                     />
                     <Disclosure>

@@ -1,5 +1,5 @@
 <script setup>
-import { ChevronDownIcon } from "@heroicons/vue/24/solid";
+import { ChatBubbleOvalLeftIcon } from "@heroicons/vue/24/outline";
 import { Link } from "@inertiajs/vue3";
 defineProps({
     user: Object,
@@ -36,6 +36,9 @@ defineEmits(["approve", "reject", "roleChange", "delete"]);
                 <Link :href="route('profile', user.username)">
                     <h3 class="font-black text-lg">{{ user.name }}</h3>
                 </Link>
+                <a :href="`http://chat-zsosm.test/chat/${user.name}`" target="_blank" class="mt-1">
+                    <ChatBubbleOvalLeftIcon class="w-6 h-6" />
+                </a>
                 <div class="flex gap-1" v-if="forApprove">
                     <button
                         class="text-xs py-1 px-2 rounded bg-emerald-500 hover:bg-emerald-600 text-white"
