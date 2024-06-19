@@ -28,7 +28,7 @@ defineEmits(["approve", "reject", "roleChange", "delete"]);
             <Link :href="route('profile', user.username)">
                 <img
                     :src="user.avatar_url || '/img/default_avatar.jpeg'"
-                    alt=""
+                    alt="user"
                     class="w-[32px] rounded-full"
                 />
             </Link>
